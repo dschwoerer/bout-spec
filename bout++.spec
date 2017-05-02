@@ -7,27 +7,37 @@ Group:          Applications/Engineering
 License:        LGPLv3
 URL:            https://boutproject.github.io/
 Source0:        https://github.com/boutproject/BOUT-dev/archive/v%{version}.tar.gz#/%{name}-%{version}.tar.gz
-Patch0:         petsc_37
-Patch1:         petsc_conf.patch
+#from upstream
+Patch0:         fix_makefile.patch
+Patch1:         petsc_37.patch
+# for integration with fedora
+Patch2:         petsc_conf.patch
+Patch3:         make_config.patch
+
 # BuildRequires:  chrpath
 # BuildRequires:  doxygen
 # BuildRequires:  netcdf-devel
-BuildRequires:  hdf5-devel
 # BuildRequires:  gawk
 # BuildRequires:  libcurl-devel
 BuildRequires:  m4
 BuildRequires:  zlib-devel
-BuildRequires:  netcdf-devel
-# %ifnarch s390 s390x %{arm}
-# BuildRequires:  valgrind
-# %endif
+BuildRequires:  autoconf
+BuildRequires:  automake
+BuildRequires:  environment-modules
 #mpiexec segfaults if ssh is not present
 #https://trac.mcs.anl.gov/projects/mpich2/ticket/1576
 BuildRequires:  openssh-clients
-BuildRequires:  blas-devel
-BuildRequires:  lapack-devel
-#Requires:       hdf5%{?_isa} = %{_hdf5_version}
-Requires:     netcdf-devel
+BuildRequires:  netcdf-devel
+BuildRequires:  hdf5-devel
+BuildRequires:  fftw-devel
+BuildRequires:  make
+BuildRequires:  netcdf-cxx-devel
+BuildRequires:  python
+BuildRequires:  python-h5py
+BuildRequires:  netcdf4-python
+#BuildRequires:  blas-devel
+#BuildRequires:  lapack-devel
+#Requires:     netcdf-devel
 
 %global debug_package %{nil}
 
@@ -45,9 +55,11 @@ Requires:     netcdf-devel
 %endif
 
 %if %{with_mpich}
+BuildRequires:  mpich-devel
 %global mpi_list mpich
 %endif
 %if %{with_openmpi}
+BuildRequires:  openmpi-devel
 %global mpi_list %{?mpi_list} openmpi
 %endif
 
@@ -61,16 +73,26 @@ equations appearing in a readable form.
 
 
 %if %{with_mpich}
-%package mpich
-Summary: NetCDF mpich libraries
+%package mpich-devel
+Summary: BOUT++ mpich libraries
 Group: Development/Libraries
-#Requires: netcdf-mpich%{?_isa} = %{_hdf5_version}
-BuildRequires: mpich-devel
-BuildRequires: petsc-mpich-devel
+Requires: mpich-devel
+Requires: netcdf-devel
+Requires: hdf5-devel
+Requires: fftw-devel
+Requires: make
+#Requires: petsc-mpich-devel
 Provides: %{name}-mpich = %{version}-%{release}
 
-%description mpich
-BOUT++ library for mpich
+%description mpich-devel
+BOUT++ is a framework for writing fluid and plasma simulations in
+curvilinear geometry. It is intended to be quite modular, with a
+variety of numerical methods and time-integration solvers available.
+BOUT++ is primarily designed and tested with reduced plasma fluid
+models in mind, but it can evolve any number of equations, with
+equations appearing in a readable form.
+
+This BOUT++ library is build for mpich.
 
 %endif
 
@@ -84,34 +106,47 @@ Requires: openmpi-devel
 #BuildRequires: hdf5-openmpi-devel >= 1.8.4
 
 %description openmpi
-BOUT++ library for openmpi
+BOUT++ is a framework for writing fluid and plasma simulations in
+curvilinear geometry. It is intended to be quite modular, with a
+variety of numerical methods and time-integration solvers available.
+BOUT++ is primarily designed and tested with reduced plasma fluid
+models in mind, but it can evolve any number of equations, with
+equations appearing in a readable form.
+
+This BOUT++ library is build for openmpi.
 %endif
+
+
+%package -n python-%{name}
+Summary: BOUT++ python library
+Group: Development/Libraries
+Requires: netcdf4-python
+Requires: python-h5py
+
+%description -n python-%{name}
+Python library for pre and post processing of BOUT++ data.
 
 
 %prep
 %setup -n BOUT-dev-%{version}
 
-#pushd BOUT-dev-%{version}
-#echo fubar
 %patch0 -p1
-#cat ../petsc_37 | patch -p 1
 %patch1 -p1
+%patch2 -p1
+%patch3 -p1
 
-#popd
-#%setup -q -n %{name}-c-%{version}
-#m4 libsrc/ncx.m4 > libsrc/ncx.c
-# Try to handle builders that can't resolve their own name
-#sed -i -s 's/mpiexec/mpiexec -host localhost/' */*.sh
 autoreconf
 
 %build
 %global configure_opts \\\
            --enable-debug \\\
            --with-netcdf \\\
-           --with-hdf5 \\\
-           --with-petsc=fedora
+           --with-hdf5
 
 %{nil}
+
+# \\\
+#           --with-petsc=/home/dave/rpmbuild/petsc/petsc-3.7.5/buildmpich_dir/
 
 # MPI builds
 export CC=mpicc
@@ -120,13 +155,13 @@ export CXX=mpicxx
 for mpi in %{mpi_list}
 do
   mkdir build_$mpi
-  cp -al [^b][^u][^i]* build-aux bin build_$mpi
+  cp -al [^b][^u][^i]* build-aux bin ?? build_$mpi
 done
 for mpi in %{mpi_list}
 do
   pushd build_$mpi
+  module purge
   module load mpi/$mpi-%{_arch}
-  #ln -s ../configure .
   # parallel tests hang on s390(x)
   %configure %{configure_opts} \
     --libdir=%{_libdir}/$mpi/lib \
@@ -143,30 +178,48 @@ done
 
 %install
 
-echo "BOUT++ is a library that needs mpi. Install bout++-openmpi or bout++-mpich" > bin/bout++
-chmod +x bin/bout++
-mkdir -p ${RPM_BUILD_ROOT}/%{_bindir}
-cp bin/bout++ ${RPM_BUILD_ROOT}/%{_bindir}
-
 for mpi in %{mpi_list}
 do
   module load mpi/$mpi-%{_arch}
   make -C build_$mpi install DESTDIR=${RPM_BUILD_ROOT}
+  echo "diff -Naur a/make.config b/make.config
+--- a/make.config       2017-05-02 23:03:57.298625399 +0100
++++ b/make.config       2017-05-02 23:04:26.460489477 +0100
+@@ -16,7 +16,7 @@
+ # PETSc config variables need to be first, else they may clobber other
+ # options (e.g. CXX, CXXFLAGS)
+ 
+-
++RELEASE                 = fedora
+ 
+ # Created this variable so that a user won't overwrite the CXXFLAGS variable
+ # on the command line, just add to this one
+" | patch -p1 ${RPM_BUILD_ROOT}/%{_includedir}/${mpi}-%{_arch}/bout/make.config
   module purge
 done
 
+pushd tools/pylib
+for d in bout* zoidberg
+do
+    mkdir -p ${RPM_BUILD_ROOT}/%{python_sitearch}/$d
+    cp $d/*py ${RPM_BUILD_ROOT}/%{python_sitearch}/$d/
+    python -O -m compileall ${RPM_BUILD_ROOT}/%{python_sitearch}/$d
+    python -m compileall ${RPM_BUILD_ROOT}/%{python_sitearch}/$d
+done
 
 %check
 # Set to 1 to fail if tests fail
 fail=1
 for mpi in %{mpi_list}
 do
-  module load mpi/$mpi-%{_arch}
-  pushd build_$mpi/examples
-  ./test_suite_make  &> log || ( cat log ; exit $fail )
-  ./test_suite       &> log || ( cat log ; exit $fail )
-  popd
-  module purge
+    module load mpi/$mpi-%{_arch}
+    pushd build_$mpi/examples
+    export PYTHONPATH=${RPM_BUILD_ROOT}/%{python_sitearch}
+    env | grep PY
+    ./test_suite_make  &> log || ( cat log ; exit $fail )
+    ./test_suite       &> log || ( cat log ; exit $fail )
+    popd
+    module purge
 done
 
 
@@ -174,30 +227,38 @@ done
 
 %postun -p /sbin/ldconfig
 
-%files
-%{_bindir}/bout++
-
-
-
 %if %{with_mpich}
-%files mpich
-%doc LICENSE README.md
-%{_includedir}/mpich-%{_arch}
-%{_includedir}/mpich-%{_arch}/bout/
-%{_includedir}/mpich-%{_arch}/bout/sys
+%files mpich-devel
+%doc README.md
+%license LICENSE
+%dir %{_includedir}/mpich-%{_arch}/bout
+%dir %{_includedir}/mpich-%{_arch}/bout/sys
+%{_includedir}/mpich-%{_arch}/*.hxx
+%{_includedir}/mpich-%{_arch}/bout/make.config
+%{_includedir}/mpich-%{_arch}/bout/*.hxx
+%{_includedir}/mpich-%{_arch}/bout/sys/*.hxx
 %{_libdir}/mpich/lib/*.a
 %endif
 
 %if %{with_openmpi}
-%files openmpi
-%doc LICENSE README.md
-%{_includedir}/openmpi-%{_arch}
-%{_includedir}/openmpi-%{_arch}/bout/
-%{_includedir}/openmpi-%{_arch}/bout/sys
+%files openmpi-devel
+%doc README.md
+%license LICENSE
+%dir %{_includedir}/openmpi-%{_arch}/bout
+%dir %{_includedir}/openmpi-%{_arch}/bout/sys
+%{_includedir}/openmpi-%{_arch}/*.hxx
+%{_includedir}/openmpi-%{_arch}/bout/*.hxx
+%{_includedir}/openmpi-%{_arch}/bout/make.config
+%{_includedir}/openmpi-%{_arch}/bout/sys/*.hxx
 %{_libdir}/openmpi/lib/*.a
 %endif
 
+%files -n python-%{name}
+%dir %{python_sitearch}/bout*
+%dir %{python_sitearch}/zoidberg
+%{python_sitearch}/bout*/*
+%{python_sitearch}/zoidberg/*
 
 %changelog
-* Wed Jul 14 2004 Ed Hill <eh3@mit.edu> - 0:3.5.1-0.fdr.0
+* Tue May 02 2017 David Schwörer <schword2mail.dcu.ie> - 4.0.0-1
 - Initial RPM release.

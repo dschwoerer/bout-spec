@@ -7,12 +7,12 @@ Group:          Applications/Engineering
 License:        LGPLv3
 URL:            https://boutproject.github.io/
 Source0:        https://github.com/boutproject/BOUT-dev/archive/v%{version}.tar.gz#/%{name}-%{version}.tar.gz
-#from upstream
+# Allow installation in configured location #550
 Patch0:         fix_makefile.patch
-Patch1:         petsc_37.patch
-# for integration with fedora
-Patch2:         petsc_conf.patch
-Patch3:         make_config.patch
+# Cleanup of pylib #548
+Patch1:         pylib.patch
+# for integration with fedora #550
+Patch2:         make_config.patch 
 
 # BuildRequires:  chrpath
 # BuildRequires:  doxygen
@@ -32,9 +32,19 @@ BuildRequires:  hdf5-devel
 BuildRequires:  fftw-devel
 BuildRequires:  make
 BuildRequires:  netcdf-cxx-devel
-BuildRequires:  python
-BuildRequires:  python-h5py
+BuildRequires:  python3
+BuildRequires:  python3-h5py
+BuildRequires:  netcdf4-python3
+BuildRequires:  python3-numpy
+BuildRequires:  python3-numpy
+BuildRequires:  python3-scipy
+BuildRequires:  python2
+BuildRequires:  python2-h5py
 BuildRequires:  netcdf4-python
+BuildRequires:  python2-numpy
+BuildRequires:  python2-numpy
+BuildRequires:  python2-scipy
+
 #BuildRequires:  blas-devel
 #BuildRequires:  lapack-devel
 #Requires:     netcdf-devel
@@ -117,14 +127,22 @@ This BOUT++ library is build for openmpi.
 %endif
 
 
-%package -n python-%{name}
+%package -n python3-%{name}
+Summary: BOUT++ python library
+Group: Development/Libraries
+Requires: netcdf4-python3
+
+%description -n python3-%{name}
+Python3 library for pre and post processing of BOUT++ data.
+
+
+%package -n python2-%{name}
 Summary: BOUT++ python library
 Group: Development/Libraries
 Requires: netcdf4-python
-Requires: python-h5py
 
-%description -n python-%{name}
-Python library for pre and post processing of BOUT++ data.
+%description -n python2-%{name}
+Python2 library for pre and post processing of BOUT++ data.
 
 
 %prep
@@ -133,20 +151,19 @@ Python library for pre and post processing of BOUT++ data.
 %patch0 -p1
 %patch1 -p1
 %patch2 -p1
-%patch3 -p1
+#%patch3 -p1
 
 autoreconf
 
 %build
 %global configure_opts \\\
-           --enable-debug \\\
            --with-netcdf \\\
            --with-hdf5
 
 %{nil}
 
-# \\\
-#           --with-petsc=/home/dave/rpmbuild/petsc/petsc-3.7.5/buildmpich_dir/
+#           --enable-debug \\\
+#           --with-petsc=/home/dave/rpmbuild/petsc/petsc-3.7.5/buildmpich_dir/ \\\
 
 # MPI builds
 export CC=mpicc
@@ -190,7 +207,7 @@ do
  # options (e.g. CXX, CXXFLAGS)
  
 -
-+RELEASE                 = fedora
++RELEASE                 = %{version}-%{?dist}
  
  # Created this variable so that a user won't overwrite the CXXFLAGS variable
  # on the command line, just add to this one
@@ -199,12 +216,24 @@ do
 done
 
 pushd tools/pylib
-for d in bout* zoidberg
+for d in bout* zoidberg post_bout
 do
-    mkdir -p ${RPM_BUILD_ROOT}/%{python_sitearch}/$d
-    cp $d/*py ${RPM_BUILD_ROOT}/%{python_sitearch}/$d/
-    python -O -m compileall ${RPM_BUILD_ROOT}/%{python_sitearch}/$d
-    python -m compileall ${RPM_BUILD_ROOT}/%{python_sitearch}/$d
+    mkdir -p ${RPM_BUILD_ROOT}/%{python3_sitearch}/$d
+    cp $d/*py ${RPM_BUILD_ROOT}/%{python3_sitearch}/$d/
+    #python3 -O -m compileall ${RPM_BUILD_ROOT}/%{python3_sitearch}/$d
+    #python3 -m compileall ${RPM_BUILD_ROOT}/%{python3_sitearch}/$d
+    mkdir -p ${RPM_BUILD_ROOT}/%{python2_sitearch}/$d
+    cp $d/*py ${RPM_BUILD_ROOT}/%{python2_sitearch}/$d/
+    #python2 -O -m compileall ${RPM_BUILD_ROOT}/%{python2_sitearch}/$d
+    #python2 -m compileall ${RPM_BUILD_ROOT}/%{python2_sitearch}/$d
+done
+for f in $(find -L ${RPM_BUILD_ROOT}/%{python3_sitearch} -executable -type f)
+do
+    sed -i 's/#!\/usr\/bin\/env python/#!\/usr\/bin\/python3/' $f
+done
+for f in $(find -L ${RPM_BUILD_ROOT}/%{python2_sitearch} -executable -type f)
+do
+    sed -i 's/#!\/usr\/bin\/env python/#!\/usr\/bin\/python2/' $f
 done
 
 %check
@@ -214,12 +243,16 @@ for mpi in %{mpi_list}
 do
     module load mpi/$mpi-%{_arch}
     pushd build_$mpi/examples
-    export PYTHONPATH=${RPM_BUILD_ROOT}/%{python_sitearch}
-    env | grep PY
+    export PYTHONPATH=${RPM_BUILD_ROOT}/%{python3_sitearch}
     ./test_suite_make  &> log || ( cat log ; exit $fail )
     ./test_suite       &> log || ( cat log ; exit $fail )
     popd
     module purge
+done
+for f in $(find -L ${RPM_BUILD_ROOT}/%{python3_sitearch}/*/*\.py{c,o} -type f)
+do
+    echo cleaning $f
+    rm $f
 done
 
 
@@ -253,11 +286,13 @@ done
 %{_libdir}/openmpi/lib/*.a
 %endif
 
-%files -n python-%{name}
-%dir %{python_sitearch}/bout*
-%dir %{python_sitearch}/zoidberg
-%{python_sitearch}/bout*/*
-%{python_sitearch}/zoidberg/*
+%files -n python3-%{name}
+%dir %{python3_sitearch}/*
+%{python3_sitearch}/*/*
+
+%files -n python2-%{name}
+%dir %{python2_sitearch}/*
+%{python2_sitearch}/*/*
 
 %changelog
 * Tue May 02 2017 David Schwörer <schword2mail.dcu.ie> - 4.0.0-1

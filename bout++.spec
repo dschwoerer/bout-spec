@@ -52,7 +52,7 @@ BuildRequires:  python2-scipy
 %global debug_package %{nil}
 
 %global with_mpich 1
-%global with_openmpi 0
+%global with_openmpi 1
 %if 0%{?rhel} && 0%{?rhel} <= 6
 %ifarch ppc64
 # No mpich on ppc64 in EL6
@@ -93,6 +93,7 @@ Requires: fftw-devel
 Requires: make
 #Requires: petsc-mpich-devel
 Provides: %{name}-mpich = %{version}-%{release}
+Provides: %{name}-mpich-static = %{version}-%{release}
 
 %description mpich-devel
 BOUT++ is a framework for writing fluid and plasma simulations in
@@ -108,14 +109,17 @@ This BOUT++ library is build for mpich.
 
 
 %if %{with_openmpi}
-%package openmpi
+%package openmpi-devel
 Summary: NetCDF openmpi libraries
 Group: Development/Libraries
 Requires: openmpi-devel
-#BuildRequires: openmpi-devel
-#BuildRequires: hdf5-openmpi-devel >= 1.8.4
-
-%description openmpi
+Requires: netcdf-devel
+Requires: hdf5-devel
+Requires: fftw-devel
+Requires: make
+Provides: %{name}-openmp = %{version}-%{release}
+Provides: %{name}-openmp-static = %{version}-%{release}
+%description openmpi-devel
 BOUT++ is a framework for writing fluid and plasma simulations in
 curvilinear geometry. It is intended to be quite modular, with a
 variety of numerical methods and time-integration solvers available.

@@ -1,16 +1,52 @@
 diff --git a/examples/drift-instability/runtest b/examples/drift-instability/runtest
-index 01f8b18..572833b 100755
+index 01f8b18..e0ef859 100755
 --- a/examples/drift-instability/runtest
 +++ b/examples/drift-instability/runtest
-@@ -17,7 +17,7 @@ try:
+@@ -15,8 +15,13 @@ except:
+ 
+ try:
    from past.utils import old_div
++  def old_div_(a,b):
++    return old_div(a,b)
  except:
++  print("replacing old_div by own implementation")
    def old_div(a,b):
--    return a / b
 +    return int(a / b)
++  def old_div_(a,b):
+     return a / b
  
  from math import isnan
+@@ -171,10 +176,10 @@ for zeff in zlist:
+                 peak[i:(nt-nt0)] = peak[i:(nt-nt0)] - nz
  
+     # Fit y = a + gamma*x
+-    a, gamma = linear_regression(old_div(t_array[nt0:nt],wci), np.log(maxVal))
++    a, gamma = linear_regression(old_div_(t_array[nt0:nt],wci), np.log(maxVal))
+ 
+     # Get phase velocity
+-    a, Vphase = linear_regression(old_div(t_array[nt0:nt],wci), peak*lbNorm/(nz-1))
++    a, Vphase = linear_regression(old_div_(t_array[nt0:nt],wci), peak*lbNorm/(nz-1))
+ 
+     # Calculate normalised quantities
+     omega=np.abs(Vphase)*kperp/wstar
+@@ -183,14 +188,14 @@ for zeff in zlist:
+     # Calculate analytic result
+     t = 0.5*( np.sqrt(sparn**4 + 16*sparn**2) - sparn**2 )
+     wr = 0.5*np.sqrt(t)
+-    wi = old_div(sparn,np.sqrt(t)) - 0.5*sparn
++    wi = old_div_(sparn,np.sqrt(t)) - 0.5*sparn
+ 
+     try:
+         origr = omega_orig[zeff]
+         origi = gamma_orig[zeff]
+ 
+-        omegadiff = old_div(abs(omega - origr), origr)
+-        gammadiff = old_div(abs(gamma - origi), origi)
++        omegadiff = old_div_(abs(omega - origr), origr)
++        gammadiff = old_div_(abs(gamma - origi), origi)
+     except:
+         origr = None
+         origi = None
 diff --git a/examples/test-initial/runtest b/examples/test-initial/runtest
 index 517dd94..4cc5f37 100755
 --- a/examples/test-initial/runtest
@@ -29,22 +65,3 @@ index 517dd94..4cc5f37 100755
  
  
  def genRand(seed):
-diff --git a/include/bout/sys/expressionparser.hxx b/include/bout/sys/expressionparser.hxx
-index 340fc99..7796ae0 100644
---- a/include/bout/sys/expressionparser.hxx
-+++ b/include/bout/sys/expressionparser.hxx
-@@ -124,12 +124,12 @@ private:
-     
-     LexInfo(std::string input);
-     
--    char curtok;  ///< Current token. -1 for number, -2 for string, 0 for "end of input"
-+    signed char curtok;  ///< Current token. -1 for number, -2 for string, 0 for "end of input"
-     double curval; ///< Value if a number
-     std::string curident; ///< Identifier, variable or function name
-     char LastChar;   ///< The last character read from the string
-     std::stringstream ss; ///< Used to read values from the input string
--    char nextToken(); ///< Get the next token in the string
-+    signed char nextToken(); ///< Get the next token in the string
-     
-     int getPos(); ///< Return position in the input
-   };

@@ -13,12 +13,11 @@ Patch0:         fix_makefile.patch
 Patch1:         pylib.patch
 # for integration with fedora #550
 Patch2:         make_config.patch 
+# Potential bugfix
+Patch3:         verbose_tests.patch
+# signed char
+Patch4:         553.patch
 
-# BuildRequires:  chrpath
-# BuildRequires:  doxygen
-# BuildRequires:  netcdf-devel
-# BuildRequires:  gawk
-# BuildRequires:  libcurl-devel
 BuildRequires:  m4
 BuildRequires:  zlib-devel
 BuildRequires:  autoconf
@@ -91,7 +90,6 @@ Requires: netcdf-devel
 Requires: hdf5-devel
 Requires: fftw-devel
 Requires: make
-#Requires: petsc-mpich-devel
 Provides: %{name}-mpich = %{version}-%{release}
 Provides: %{name}-mpich-static = %{version}-%{release}
 
@@ -155,7 +153,8 @@ Python2 library for pre and post processing of BOUT++ data.
 %patch0 -p1
 %patch1 -p1
 %patch2 -p1
-#%patch3 -p1
+%patch3 -p1
+%patch4 -p1
 
 autoreconf
 
@@ -224,12 +223,8 @@ for d in bout* zoidberg post_bout
 do
     mkdir -p ${RPM_BUILD_ROOT}/%{python3_sitearch}/$d
     cp $d/*py ${RPM_BUILD_ROOT}/%{python3_sitearch}/$d/
-    #python3 -O -m compileall ${RPM_BUILD_ROOT}/%{python3_sitearch}/$d
-    #python3 -m compileall ${RPM_BUILD_ROOT}/%{python3_sitearch}/$d
     mkdir -p ${RPM_BUILD_ROOT}/%{python2_sitearch}/$d
     cp $d/*py ${RPM_BUILD_ROOT}/%{python2_sitearch}/$d/
-    #python2 -O -m compileall ${RPM_BUILD_ROOT}/%{python2_sitearch}/$d
-    #python2 -m compileall ${RPM_BUILD_ROOT}/%{python2_sitearch}/$d
 done
 for f in $(find -L ${RPM_BUILD_ROOT}/%{python3_sitearch} -executable -type f)
 do

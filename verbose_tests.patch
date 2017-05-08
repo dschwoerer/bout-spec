@@ -1,40 +1,50 @@
 diff --git a/examples/drift-instability/runtest b/examples/drift-instability/runtest
-index 01f8b18..e0ef859 100755
+index 01f8b18..2976152 100755
 --- a/examples/drift-instability/runtest
 +++ b/examples/drift-instability/runtest
-@@ -15,8 +15,13 @@ except:
- 
+@@ -16,8 +16,9 @@ except:
  try:
    from past.utils import old_div
-+  def old_div_(a,b):
-+    return old_div(a,b)
  except:
 +  print("replacing old_div by own implementation")
    def old_div(a,b):
+-    return a / b
 +    return int(a / b)
-+  def old_div_(a,b):
-     return a / b
  
  from math import isnan
-@@ -171,10 +176,10 @@ for zeff in zlist:
+ 
+@@ -129,8 +130,8 @@ for zeff in zlist:
+ 
+     lpar = np.sum(((grid['Bxy']/grid['Bpxy']))*grid['dlthe']) / grid['nx'] # [m], average over flux surfaces
+     kpar = 2*np.pi/(1e2*lpar) # cm-1
+-    spar = (old_div(kpar,kperp))**2 * wci * wce / (0.51 * nuei) # [1/s]
+-    sparn = old_div(spar, wstar)
++    spar = (kpar/kperp)**2 * wci * wce / (0.51 * nuei) # [1/s]
++    sparn = spar / wstar
+ 
+     wpe   = 5.64e4*np.sqrt(1e14*grid['Ni_x']) # electron plasma frequency, [rad/s]
+     mu    = (cLight*kperp/wpe)**2
+@@ -171,26 +172,26 @@ for zeff in zlist:
                  peak[i:(nt-nt0)] = peak[i:(nt-nt0)] - nz
  
      # Fit y = a + gamma*x
 -    a, gamma = linear_regression(old_div(t_array[nt0:nt],wci), np.log(maxVal))
-+    a, gamma = linear_regression(old_div_(t_array[nt0:nt],wci), np.log(maxVal))
++    a, gamma = linear_regression((t_array[nt0:nt]/wci), np.log(maxVal))
  
      # Get phase velocity
 -    a, Vphase = linear_regression(old_div(t_array[nt0:nt],wci), peak*lbNorm/(nz-1))
-+    a, Vphase = linear_regression(old_div_(t_array[nt0:nt],wci), peak*lbNorm/(nz-1))
++    a, Vphase = linear_regression((t_array[nt0:nt]/wci), peak*lbNorm/(nz-1))
  
      # Calculate normalised quantities
      omega=np.abs(Vphase)*kperp/wstar
-@@ -183,14 +188,14 @@ for zeff in zlist:
+-    gamma=old_div(gamma,wstar)
++    gamma=gamma / wstar
+ 
      # Calculate analytic result
      t = 0.5*( np.sqrt(sparn**4 + 16*sparn**2) - sparn**2 )
      wr = 0.5*np.sqrt(t)
 -    wi = old_div(sparn,np.sqrt(t)) - 0.5*sparn
-+    wi = old_div_(sparn,np.sqrt(t)) - 0.5*sparn
++    wi = (sparn/np.sqrt(t)) - 0.5*sparn
  
      try:
          origr = omega_orig[zeff]
@@ -42,26 +52,8 @@ index 01f8b18..e0ef859 100755
  
 -        omegadiff = old_div(abs(omega - origr), origr)
 -        gammadiff = old_div(abs(gamma - origi), origi)
-+        omegadiff = old_div_(abs(omega - origr), origr)
-+        gammadiff = old_div_(abs(gamma - origi), origi)
++        omegadiff = (abs(omega - origr) / origr)
++        gammadiff = (abs(gamma - origi) / origi)
      except:
          origr = None
          origi = None
-diff --git a/examples/test-initial/runtest b/examples/test-initial/runtest
-index 517dd94..4cc5f37 100755
---- a/examples/test-initial/runtest
-+++ b/examples/test-initial/runtest
-@@ -19,7 +19,12 @@ def bout_round(x):
-     """
-     BOUT++ rounding
-     """
--    return x + 0.5 if x > 0.0 else x - 0.5
-+    for f in (x,.5):
-+        finfo = np.finfo(f)
-+        print( finfo.dtype, finfo.nexp, finfo.nmant)
-+    ret=x + 0.5 if x > 0.0 else x - 0.5
-+    print("%.20f"%(ret-int(ret)))
-+    return ret
- 
- 
- def genRand(seed):

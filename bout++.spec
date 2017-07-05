@@ -219,13 +219,19 @@ do
 done
 
 pushd tools/pylib
-for d in bout* zoidberg post_bout
+for d in boutdata bout_runners boututils  post_bout zoidberg
 do
     mkdir -p ${RPM_BUILD_ROOT}/%{python3_sitearch}/$d
     cp $d/*py ${RPM_BUILD_ROOT}/%{python3_sitearch}/$d/
     mkdir -p ${RPM_BUILD_ROOT}/%{python2_sitearch}/$d
     cp $d/*py ${RPM_BUILD_ROOT}/%{python2_sitearch}/$d/
 done
+make -C _boutcore_build/ clean
+PY=python3 make -C _boutcore_build/ pseudoinstall
+install boutcore.*.so ${RPM_BUILD_ROOT}/%{python3_sitearch}/
+make -C _boutcore_build/ clean
+PY=python2 make -C _boutcore_build/ pseudoinstall
+install boutcore.so ${RPM_BUILD_ROOT}/%{python2_sitearch}/
 for f in $(find -L ${RPM_BUILD_ROOT}/%{python3_sitearch} -executable -type f)
 do
     sed -i 's/#!\/usr\/bin\/env python/#!\/usr\/bin\/python3/' $f

@@ -1,5 +1,5 @@
 Name:           bout++
-Version:        4.0.0
+Version:        4.1.1
 Release:        1%{?dist}
 Summary:        Library for the BOUndary Turbulence simulation framework
 
@@ -7,30 +7,20 @@ Group:          Applications/Engineering
 License:        LGPLv3
 URL:            https://boutproject.github.io/
 Source0:        https://github.com/boutproject/BOUT-dev/archive/v%{version}.tar.gz#/%{name}-%{version}.tar.gz
-# Allow installation in configured location #550
-Patch0:         fix_makefile.patch
-# Cleanup of pylib #548
-Patch1:         pylib.patch
-# for integration with fedora #550
-Patch2:         make_config.patch 
-# Potential bugfix
-Patch3:         verbose_tests.patch
-# signed char
-Patch4:         553.patch
+
+# Disable plotting PR 751
+Patch0:         tests.patch
 
 BuildRequires:  m4
 BuildRequires:  zlib-devel
 BuildRequires:  autoconf
 BuildRequires:  automake
 BuildRequires:  environment-modules
-#mpiexec segfaults if ssh is not present
-#https://trac.mcs.anl.gov/projects/mpich2/ticket/1576
-BuildRequires:  openssh-clients
 BuildRequires:  netcdf-devel
+BuildRequires:  netcdf-cxx4-devel
 BuildRequires:  hdf5-devel
 BuildRequires:  fftw-devel
 BuildRequires:  make
-BuildRequires:  netcdf-cxx-devel
 BuildRequires:  python3
 BuildRequires:  python3-h5py
 BuildRequires:  netcdf4-python3
@@ -39,7 +29,6 @@ BuildRequires:  python3-numpy
 BuildRequires:  python3-scipy
 BuildRequires:  python2
 BuildRequires:  python2-h5py
-BuildRequires:  netcdf4-python
 BuildRequires:  python2-numpy
 BuildRequires:  python2-numpy
 BuildRequires:  python2-scipy
@@ -86,7 +75,7 @@ equations appearing in a readable form.
 Summary: BOUT++ mpich libraries
 Group: Development/Libraries
 Requires: mpich-devel
-Requires: netcdf-devel
+Requires: netcdf-cxx4-devel
 Requires: hdf5-devel
 Requires: fftw-devel
 Requires: make
@@ -151,10 +140,6 @@ Python2 library for pre and post processing of BOUT++ data.
 %setup -n BOUT-dev-%{version}
 
 %patch0 -p1
-%patch1 -p1
-%patch2 -p1
-%patch3 -p1
-%patch4 -p1
 
 autoreconf
 
@@ -202,6 +187,7 @@ for mpi in %{mpi_list}
 do
   module load mpi/$mpi-%{_arch}
   make -C build_$mpi install DESTDIR=${RPM_BUILD_ROOT}
+  mv  ${RPM_BUILD_ROOT}/usr/share/bout++/make.config ${RPM_BUILD_ROOT}/%{_includedir}/$mpi-%{_arch}/bout++/
   echo "diff -Naur a/make.config b/make.config
 --- a/make.config       2017-05-02 23:03:57.298625399 +0100
 +++ b/make.config       2017-05-02 23:04:26.460489477 +0100
@@ -210,11 +196,12 @@ do
  # options (e.g. CXX, CXXFLAGS)
  
 -
-+RELEASE                 = %{version}-%{?dist}
++RELEASED                 = %{version}-%{release}
  
- # Created this variable so that a user won't overwrite the CXXFLAGS variable
- # on the command line, just add to this one
-" | patch -p1 ${RPM_BUILD_ROOT}/%{_includedir}/${mpi}-%{_arch}/bout/make.config
+ # These lines can be replaced in \"make install\" to point to install directories
+ # They are used in the CXXFLAGS variable below rather than hard-coding the directories
+" | patch --no-backup-if-mismatch -p1 --fuzz=0 ${RPM_BUILD_ROOT}/%{_includedir}/${mpi}-%{_arch}/bout++/make.config
+  rm -rf  ${RPM_BUILD_ROOT}/usr/share/bout++
   module purge
 done
 
@@ -226,12 +213,11 @@ do
     mkdir -p ${RPM_BUILD_ROOT}/%{python2_sitearch}/$d
     cp $d/*py ${RPM_BUILD_ROOT}/%{python2_sitearch}/$d/
 done
-make -C _boutcore_build/ clean
-PY=python3 make -C _boutcore_build/ pseudoinstall
-install boutcore.*.so ${RPM_BUILD_ROOT}/%{python3_sitearch}/
-make -C _boutcore_build/ clean
-PY=python2 make -C _boutcore_build/ pseudoinstall
-install boutcore.so ${RPM_BUILD_ROOT}/%{python2_sitearch}/
+#make python3
+#install boutcore.*.so ${RPM_BUILD_ROOT}/%{python3_sitearch}/
+#make python2
+#install boutcore.so ${RPM_BUILD_ROOT}/%{python2_sitearch}/
+
 for f in $(find -L ${RPM_BUILD_ROOT}/%{python3_sitearch} -executable -type f)
 do
     sed -i 's/#!\/usr\/bin\/env python/#!\/usr\/bin\/python3/' $f
@@ -247,13 +233,18 @@ fail=1
 for mpi in %{mpi_list}
 do
     module load mpi/$mpi-%{_arch}
-    pushd build_$mpi/examples
+    pushd build_$mpi/tests/integrated
     export PYTHONPATH=${RPM_BUILD_ROOT}/%{python3_sitearch}
-    ./test_suite_make  &> log || ( cat log ; exit $fail )
-    ./test_suite       &> log || ( cat log ; exit $fail )
+    export PYTHONIOENCODING=utf8
+    #./test_suite_make  &> log || ( cat log ; exit $fail )
+    #./test_suite       &> log || ( env; echo $PYTHONPATH ; cat log ; exit $fail )
+    popd
+    pushd build_$mpi/tests/MMS
+    #./test_suite       &> log || ( cat log ; exit $fail )
     popd
     module purge
 done
+
 for f in $(find -L ${RPM_BUILD_ROOT}/%{python3_sitearch}/*/*\.py{c,o} -type f)
 do
     echo cleaning $f
@@ -269,26 +260,36 @@ done
 %files mpich-devel
 %doc README.md
 %license LICENSE
-%dir %{_includedir}/mpich-%{_arch}/bout
-%dir %{_includedir}/mpich-%{_arch}/bout/sys
-%{_includedir}/mpich-%{_arch}/*.hxx
-%{_includedir}/mpich-%{_arch}/bout/make.config
-%{_includedir}/mpich-%{_arch}/bout/*.hxx
-%{_includedir}/mpich-%{_arch}/bout/sys/*.hxx
+%dir %{_includedir}/mpich-%{_arch}/bout++
+%dir %{_includedir}/mpich-%{_arch}/bout++/bout
+%dir %{_includedir}/mpich-%{_arch}/bout++/bout/invert
+%dir %{_includedir}/mpich-%{_arch}/bout++/bout/sys
+%{_includedir}/mpich-%{_arch}/bout++/*.hxx
+%{_includedir}/mpich-%{_arch}/bout++/make.config
+%{_includedir}/mpich-%{_arch}/bout++/bout/*.hxx
+%{_includedir}/mpich-%{_arch}/bout++/bout/invert/*.hxx
+%{_includedir}/mpich-%{_arch}/bout++/bout/sys/*.hxx
+%{_includedir}/mpich-%{_arch}/bout++/pvode/*.h
 %{_libdir}/mpich/lib/*.a
+%{_libdir}/mpich/bin/*
 %endif
 
 %if %{with_openmpi}
 %files openmpi-devel
 %doc README.md
 %license LICENSE
-%dir %{_includedir}/openmpi-%{_arch}/bout
-%dir %{_includedir}/openmpi-%{_arch}/bout/sys
-%{_includedir}/openmpi-%{_arch}/*.hxx
-%{_includedir}/openmpi-%{_arch}/bout/*.hxx
-%{_includedir}/openmpi-%{_arch}/bout/make.config
-%{_includedir}/openmpi-%{_arch}/bout/sys/*.hxx
+%dir %{_includedir}/openmpi-%{_arch}/bout++
+%dir %{_includedir}/openmpi-%{_arch}/bout++/bout
+%dir %{_includedir}/openmpi-%{_arch}/bout++/bout/invert
+%dir %{_includedir}/openmpi-%{_arch}/bout++/bout/sys
+%{_includedir}/openmpi-%{_arch}/bout++/*.hxx
+%{_includedir}/openmpi-%{_arch}/bout++/bout/*.hxx
+%{_includedir}/openmpi-%{_arch}/bout++/make.config
+%{_includedir}/openmpi-%{_arch}/bout++/bout/invert/*.hxx
+%{_includedir}/openmpi-%{_arch}/bout++/bout/sys/*.hxx
+%{_includedir}/openmpi-%{_arch}/bout++/pvode/*.h
 %{_libdir}/openmpi/lib/*.a
+%{_libdir}/openmpi/bin/*
 %endif
 
 %files -n python3-%{name}
@@ -300,5 +301,5 @@ done
 %{python2_sitearch}/*/*
 
 %changelog
-* Tue May 02 2017 David Schwörer <schword2mail.dcu.ie> - 4.0.0-1
+* Tue May 02 2017 David Schwörer <schword2mail.dcu.ie> - 4.1.1-1
 - Initial RPM release.

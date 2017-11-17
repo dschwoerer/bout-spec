@@ -17,21 +17,18 @@ BuildRequires:  autoconf
 BuildRequires:  automake
 BuildRequires:  environment-modules
 BuildRequires:  netcdf-devel
-BuildRequires:  netcdf-cxx4-devel
-BuildRequires:  hdf5-devel
 BuildRequires:  fftw-devel
 BuildRequires:  make
 BuildRequires:  python3
 BuildRequires:  python3-h5py
-BuildRequires:  netcdf4-python3
 BuildRequires:  python3-numpy
-BuildRequires:  python3-numpy
+BuildRequires:  python3-netcdf4
 BuildRequires:  python3-scipy
 BuildRequires:  python2
-BuildRequires:  python2-h5py
-BuildRequires:  python2-numpy
-BuildRequires:  python2-numpy
-BuildRequires:  python2-scipy
+#BuildRequires:  python2-h5py
+#BuildRequires:  python2-numpy
+#BuildRequires:  python2-netcdf4
+#BuildRequires:  python2-scipy
 
 #BuildRequires:  blas-devel
 #BuildRequires:  lapack-devel
@@ -97,7 +94,7 @@ This BOUT++ library is build for mpich.
 
 %if %{with_openmpi}
 %package openmpi-devel
-Summary: NetCDF openmpi libraries
+Summary: BOUT++ openmpi libraries
 Group: Development/Libraries
 Requires: openmpi-devel
 Requires: netcdf-devel
@@ -236,11 +233,11 @@ do
     pushd build_$mpi/tests/integrated
     export PYTHONPATH=${RPM_BUILD_ROOT}/%{python3_sitearch}
     export PYTHONIOENCODING=utf8
-    #./test_suite_make  &> log || ( cat log ; exit $fail )
-    #./test_suite       &> log || ( env; echo $PYTHONPATH ; cat log ; exit $fail )
+    ./test_suite_make  &> log || ( cat log ; exit $fail )
+    ./test_suite       &> log || ( env; echo $PYTHONPATH ; cat log ; exit $fail )
     popd
     pushd build_$mpi/tests/MMS
-    #./test_suite       &> log || ( cat log ; exit $fail )
+    ./test_suite       &> log || ( cat log ; exit $fail )
     popd
     module purge
 done

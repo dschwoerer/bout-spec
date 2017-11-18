@@ -1,0 +1,1 @@
+../../bout++-nighly/bout++-nightly.spec

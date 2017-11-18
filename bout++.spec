@@ -76,6 +76,7 @@ Requires: mpich-devel
 Requires: netcdf-cxx4-devel
 Requires: hdf5-devel
 Requires: fftw-devel
+Requires: %{name}-common
 Requires: make
 Provides: %{name}-mpich = %{version}-%{release}
 Provides: %{name}-mpich-static = %{version}-%{release}
@@ -102,8 +103,9 @@ Requires: netcdf-devel
 Requires: hdf5-devel
 Requires: fftw-devel
 Requires: make
-Provides: %{name}-openmp = %{version}-%{release}
-Provides: %{name}-openmp-static = %{version}-%{release}
+Requires: %{name}-common
+Provides: %{name}-openmpi = %{version}-%{release}
+Provides: %{name}-openmpi-static = %{version}-%{release}
 %description openmpi-devel
 BOUT++ is a framework for writing fluid and plasma simulations in
 curvilinear geometry. It is intended to be quite modular, with a
@@ -120,6 +122,7 @@ This BOUT++ library is build for openmpi.
 Summary: BOUT++ python library
 Group: Development/Libraries
 Requires: netcdf4-python3
+Requires: %{name}-common
 
 %description -n python3-%{name}
 Python3 library for pre and post processing of BOUT++ data.
@@ -129,10 +132,24 @@ Python3 library for pre and post processing of BOUT++ data.
 Summary: BOUT++ python library
 Group: Development/Libraries
 Requires: netcdf4-python
+Requires: %{name}-common
 
 %description -n python2-%{name}
 Python2 library for pre and post processing of BOUT++ data.
 
+%package -n common
+Summary: BOUT++ python library
+Group: Development/Libraries
+
+%description -n common
+BOUT++ is a framework for writing fluid and plasma simulations in
+curvilinear geometry. It is intended to be quite modular, with a
+variety of numerical methods and time-integration solvers available.
+BOUT++ is primarily designed and tested with reduced plasma fluid
+models in mind, but it can evolve any number of equations, with
+equations appearing in a readable form.
+
+This package contains the common files.
 
 %prep
 %setup -n BOUT-dev-%{version}
@@ -256,8 +273,6 @@ done
 
 %if %{with_mpich}
 %files mpich-devel
-%doc README.md
-%license LICENSE
 %dir %{_includedir}/mpich-%{_arch}/bout++
 %dir %{_includedir}/mpich-%{_arch}/bout++/bout
 %dir %{_includedir}/mpich-%{_arch}/bout++/bout/invert
@@ -274,8 +289,6 @@ done
 
 %if %{with_openmpi}
 %files openmpi-devel
-%doc README.md
-%license LICENSE
 %dir %{_includedir}/openmpi-%{_arch}/bout++
 %dir %{_includedir}/openmpi-%{_arch}/bout++/bout
 %dir %{_includedir}/openmpi-%{_arch}/bout++/bout/invert
@@ -297,6 +310,13 @@ done
 %files -n python2-%{name}
 %dir %{python2_sitearch}/*
 %{python2_sitearch}/*/*
+
+%files -n common
+%doc README.md
+%doc CITATION
+%doc CHANGELOG.md
+%license LICENSE
+%license LICENSE.GPL
 
 %changelog
 * Tue May 02 2017 David Schwörer <schword2mail.dcu.ie> - 4.1.1-1

@@ -137,11 +137,11 @@ Requires: %{name}-common
 %description -n python2-%{name}
 Python2 library for pre and post processing of BOUT++ data.
 
-%package -n common
+%package common
 Summary: BOUT++ python library
 Group: Development/Libraries
 
-%description -n common
+%description  common
 BOUT++ is a framework for writing fluid and plasma simulations in
 curvilinear geometry. It is intended to be quite modular, with a
 variety of numerical methods and time-integration solvers available.
@@ -311,7 +311,7 @@ done
 %dir %{python2_sitearch}/*
 %{python2_sitearch}/*/*
 
-%files -n common
+%files common
 %doc README.md
 %doc CITATION
 %doc CHANGELOG.md

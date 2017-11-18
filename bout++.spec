@@ -17,6 +17,7 @@ BuildRequires:  autoconf
 BuildRequires:  automake
 BuildRequires:  environment-modules
 BuildRequires:  netcdf-devel
+BuildRequires:  netcdf-cxx4-devel
 BuildRequires:  fftw-devel
 BuildRequires:  make
 BuildRequires:  python3
@@ -25,10 +26,10 @@ BuildRequires:  python3-numpy
 BuildRequires:  python3-netcdf4
 BuildRequires:  python3-scipy
 BuildRequires:  python2
-#BuildRequires:  python2-h5py
-#BuildRequires:  python2-numpy
-#BuildRequires:  python2-netcdf4
-#BuildRequires:  python2-scipy
+BuildRequires:  python2-h5py
+BuildRequires:  python2-numpy
+BuildRequires:  python2-netcdf4
+BuildRequires:  python2-scipy
 
 #BuildRequires:  blas-devel
 #BuildRequires:  lapack-devel

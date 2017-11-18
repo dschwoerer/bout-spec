@@ -200,6 +200,7 @@ done
 
 for mpi in %{mpi_list}
 do
+  module purge
   module load mpi/$mpi-%{_arch}
   make -C build_$mpi install DESTDIR=${RPM_BUILD_ROOT}
   mv  ${RPM_BUILD_ROOT}/usr/share/bout++/make.config ${RPM_BUILD_ROOT}/%{_includedir}/$mpi-%{_arch}/bout++/
@@ -247,6 +248,7 @@ done
 fail=1
 for mpi in %{mpi_list}
 do
+    module purge
     module load mpi/$mpi-%{_arch}
     pushd build_$mpi/tests/integrated
     export PYTHONPATH=${RPM_BUILD_ROOT}/%{python3_sitearch}

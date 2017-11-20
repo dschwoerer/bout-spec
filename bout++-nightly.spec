@@ -36,6 +36,7 @@ BuildRequires:  python2-numpy
 BuildRequires:  python2-netcdf4
 BuildRequires:  python2-scipy
 BuildRequires:  python2-Cython
+BuildRequires:  python2-future
 
 #BuildRequires:  blas-devel
 #BuildRequires:  lapack-devel

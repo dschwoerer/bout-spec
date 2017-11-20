@@ -89,10 +89,10 @@ index 689d283f..e6d819d2 100755
  if success:
      exit(0)
 diff --git a/tools/pylib/_boutcore_build/Makefile b/tools/pylib/_boutcore_build/Makefile
-index 95760c5d..13631e1f 100644
+index 95760c5d..243b7f8c 100644
 --- a/tools/pylib/_boutcore_build/Makefile
 +++ b/tools/pylib/_boutcore_build/Makefile
-@@ -11,7 +11,7 @@ helper.cxx:helper.cxx.in
+@@ -11,13 +11,13 @@ helper.cxx:helper.cxx.in
  TOGEN=setup.py boutcore.pyx resolve_enum.pxd helper.cxx helper.h
  $(TOGEN): Makefile
  	@echo generating $@
@@ -101,6 +101,13 @@ index 95760c5d..13631e1f 100644
  
  boutcore.so: boutcore.pyx setup.py helper.cxx helper.h $(TOGEN)
  	@$(PY) setup.py build_ext --inplace
+ 
+ test: boutcore.so
+-	@$(PY) ./runtest > run.log
++	@PYTHONPATH=..:$$PYTHONPATH $(PY) ./runtest > run.log
+ 
+ check: test
+ .PHONY:
 diff --git a/tools/pylib/_boutcore_build/boutcore.pyx.in b/tools/pylib/_boutcore_build/boutcore.pyx.in
 index d264d980..046c10d9 100755
 --- a/tools/pylib/_boutcore_build/boutcore.pyx.in

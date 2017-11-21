@@ -267,11 +267,11 @@ do
     module load mpi/$mpi-%{_arch}
     pushd build_$mpi/tools/pylib
     make python3
-    mkdir -p ${RPM_BUILD_ROOT}/%{python3_sitearch}/${mpi}/bout++/
-    install boutcore.*.so ${RPM_BUILD_ROOT}/%{python3_sitearch}/${mpi}/bout++/
+    mkdir -p ${RPM_BUILD_ROOT}/%{python3_sitearch}/${mpi}/
+    install boutcore.*.so ${RPM_BUILD_ROOT}/%{python3_sitearch}/${mpi}/
     make python2
-    mkdir -p ${RPM_BUILD_ROOT}/%{python2_sitearch}/${mpi}/bout++/
-    install boutcore.so ${RPM_BUILD_ROOT}/%{python2_sitearch}/${mpi}/bout++/
+    mkdir -p ${RPM_BUILD_ROOT}/%{python2_sitearch}/${mpi}/
+    install boutcore.so ${RPM_BUILD_ROOT}/%{python2_sitearch}/${mpi}/
     popd
     module purge
 done
@@ -331,11 +331,9 @@ done
 %{_libdir}/mpich/lib/*.a
 %{_libdir}/mpich/bin/*
 %files -n python3-%{name}-mpich
-%dir %{python3_sitearch}/mpich/bout++
-%{python3_sitearch}/mpich/bout++/*
+%{python3_sitearch}/mpich/*
 %files -n python2-%{name}-mpich
-%dir %{python2_sitearch}/mpich/bout++
-%{python2_sitearch}/mpich/bout++/*
+%{python2_sitearch}/mpich/*
 %endif
 
 %if %{with_openmpi}
@@ -352,12 +350,12 @@ done
 %{_includedir}/openmpi-%{_arch}/bout++/pvode/*.h
 %{_libdir}/openmpi/lib/*.a
 %{_libdir}/openmpi/bin/*
-# %files -n python3-%{name}-openmpi
-# %dir %{python3_sitearch}/openmpi/bout++
-# %{python3_sitearch}/openmpi/bout++/*
-# %files -n python2-%{name}-openmpi
-# %dir %{python2_sitearch}/openmpi/bout++
-# %{python2_sitearch}/openmpi/bout++/*
+# %%files -n python3-%{name}-openmpi
+# %%dir %{python3_sitearch}/openmpi/bout++
+# %%{python3_sitearch}/openmpi/bout++/*
+# %%files -n python2-%{name}-openmpi
+# %%dir %{python2_sitearch}/openmpi/bout++
+# %%{python2_sitearch}/openmpi/bout++/*
 %endif
 
 %files -n python3-%{name}

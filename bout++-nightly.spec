@@ -3,7 +3,7 @@
 %global shortcommit %(c=%{commit}; echo ${c:0:7})
 Name:           bout++-nightly
 Version:        4.1.1
-Release:        20170228git%{shortcommit}%{?dist}
+Release:        20171124git%{shortcommit}-2%{?dist}
 Summary:        Library for the BOUndary Turbulence simulation framework
 
 Group:          Applications/Engineering
@@ -103,7 +103,6 @@ This BOUT++ library is build for mpich.
 %package -n python3-%{name}-mpich
 Summary:  BOUT++ mpich library for python3
 Group: Development/Libraries
-Requires: %{name}-mpich
 Requires: %{name}-common
 Requires: python3
 %description  -n python3-%{name}-mpich
@@ -351,11 +350,9 @@ done
 %{_libdir}/openmpi/lib/*.a
 %{_libdir}/openmpi/bin/*
 # %%files -n python3-%{name}-openmpi
-# %%dir %{python3_sitearch}/openmpi/bout++
-# %%{python3_sitearch}/openmpi/bout++/*
+# %%{python3_sitearch}/openmpi/*
 # %%files -n python2-%{name}-openmpi
-# %%dir %{python2_sitearch}/openmpi/bout++
-# %%{python2_sitearch}/openmpi/bout++/*
+# %%{python2_sitearch}/openmpi/*
 %endif
 
 %files -n python3-%{name}

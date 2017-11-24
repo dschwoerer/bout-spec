@@ -3,7 +3,7 @@
 %global shortcommit %(c=%{commit}; echo ${c:0:7})
 Name:           bout++-nightly
 Version:        4.1.1
-Release:        20171124git%{shortcommit}-2%{?dist}
+Release:        20171124git%{shortcommit}%{?dist}
 Summary:        Library for the BOUndary Turbulence simulation framework
 
 Group:          Applications/Engineering

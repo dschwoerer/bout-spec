@@ -105,6 +105,7 @@ Summary:  BOUT++ mpich library for python3
 Group: Development/Libraries
 Requires: %{name}-common
 Requires: python3
+Requires: mpich
 %description  -n python3-%{name}-mpich
 This is the BOUT++ library python3 with mpich.
 

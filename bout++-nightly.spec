@@ -38,10 +38,6 @@ BuildRequires:  python2-scipy
 BuildRequires:  python2-Cython
 BuildRequires:  python2-future
 
-#BuildRequires:  blas-devel
-#BuildRequires:  lapack-devel
-#Requires:     netcdf-devel
-
 %global debug_package %{nil}
 
 %global with_mpich 1
@@ -106,6 +102,8 @@ Group: Development/Libraries
 Requires: %{name}-common
 Requires: python3
 Requires: mpich
+Requires: python3-mpich
+Requires: python3-numpy
 %description  -n python3-%{name}-mpich
 This is the BOUT++ library python3 with mpich.
 
@@ -113,8 +111,10 @@ This is the BOUT++ library python3 with mpich.
 Summary:  BOUT++ mpich library for python2
 Group: Development/Libraries
 Requires: %{name}-mpich
-Requires: %{name}-common
 Requires: python2
+Requires: mpich
+Requires: python2-mpich
+Requires: python2-numpy
 %description  -n python2-%{name}-mpich
 This is the BOUT++ library python2 with mpich.
 

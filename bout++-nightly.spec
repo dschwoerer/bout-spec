@@ -1,9 +1,9 @@
 %global git 1
-%global commit a047bfc6b078d3f41541daf81d58f24a95cab4d4
+%global commit 64a65ddee94a6d417f637fa3f80a0849528d4aac
 %global shortcommit %(c=%{commit}; echo ${c:0:7})
 Name:           bout++-nightly
 Version:        4.1.1
-Release:        20171124git%{shortcommit}%{?dist}
+Release:        20171130git%{shortcommit}%{?dist}
 Summary:        Library for the BOUndary Turbulence simulation framework
 
 Group:          Applications/Engineering
@@ -12,7 +12,7 @@ URL:            https://boutproject.github.io/
 Source0:        https://github.com/dschwoerer/BOUT-dev/archive/%{commit}.tar.gz#/%{name}-%{version}.tar.gz
 
 # Disable plotting PR 751
-Patch0:         fix.patch
+#Patch0:         fix.patch
 
 BuildRequires:  m4
 BuildRequires:  zlib-devel
@@ -181,7 +181,7 @@ This package contains the common files.
 %prep
 %setup -n BOUT-dev-%{commit}
 
-%patch0 -p1
+#%%patch0 -p1
 
 autoreconf
 
@@ -204,7 +204,7 @@ export CXX=mpicxx
 for mpi in %{mpi_list}
 do
   mkdir build_$mpi
-  cp -al [^b][^u][^i]* build-aux bin ?? build_$mpi
+  cp -al [^b]* build-aux bin build_$mpi
 done
 for mpi in %{mpi_list}
 do

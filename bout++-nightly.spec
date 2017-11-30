@@ -149,8 +149,8 @@ Requires: python3
 Requires: openmpi
 Requires: python3-openmpi
 Requires: python3-numpy
-%description  -n python3-%{name}-mpich
-This is the BOUT++ library python3 with mpich.
+%description  -n python3-%{name}-openmpi
+This is the BOUT++ library python3 with openmpi.
 
 %package -n python2-%{name}-openmpi
 Summary:  BOUT++ mpich library for python2
@@ -160,8 +160,8 @@ Requires: python2
 Requires: openmpi
 Requires: python2-openmpi
 Requires: python2-numpy
-%description  -n python2-%{name}-mpich
-This is the BOUT++ library python2 with mpich.
+%description  -n python2-%{name}-openmpi
+This is the BOUT++ library python2 with openmpi.
 
 
 %endif

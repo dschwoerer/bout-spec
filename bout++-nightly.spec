@@ -140,6 +140,30 @@ models in mind, but it can evolve any number of equations, with
 equations appearing in a readable form.
 
 This BOUT++ library is build for openmpi.
+
+%package -n python3-%{name}-openmpi
+Summary:  BOUT++ mpich library for python3
+Group: Development/Libraries
+Requires: %{name}-common
+Requires: python3
+Requires: openmpi
+Requires: python3-openmpi
+Requires: python3-numpy
+%description  -n python3-%{name}-mpich
+This is the BOUT++ library python3 with mpich.
+
+%package -n python2-%{name}-openmpi
+Summary:  BOUT++ mpich library for python2
+Group: Development/Libraries
+Requires: %{name}-mpich
+Requires: python2
+Requires: openmpi
+Requires: python2-openmpi
+Requires: python2-numpy
+%description  -n python2-%{name}-mpich
+This is the BOUT++ library python2 with mpich.
+
+
 %endif
 
 
@@ -341,17 +365,17 @@ done
 %dir %{_includedir}/openmpi-%{_arch}/bout++/bout/invert
 %dir %{_includedir}/openmpi-%{_arch}/bout++/bout/sys
 %{_includedir}/openmpi-%{_arch}/bout++/*.hxx
-%{_includedir}/openmpi-%{_arch}/bout++/bout/*.hxx
 %{_includedir}/openmpi-%{_arch}/bout++/make.config
+%{_includedir}/openmpi-%{_arch}/bout++/bout/*.hxx
 %{_includedir}/openmpi-%{_arch}/bout++/bout/invert/*.hxx
 %{_includedir}/openmpi-%{_arch}/bout++/bout/sys/*.hxx
 %{_includedir}/openmpi-%{_arch}/bout++/pvode/*.h
 %{_libdir}/openmpi/lib/*.a
 %{_libdir}/openmpi/bin/*
-# %%files -n python3-%{name}-openmpi
-# %%{python3_sitearch}/openmpi/*
-# %%files -n python2-%{name}-openmpi
-# %%{python2_sitearch}/openmpi/*
+%files -n python3-%{name}-openmpi
+%{python3_sitearch}/openmpi/*
+%files -n python2-%{name}-openmpi
+%{python2_sitearch}/openmpi/*
 %endif
 
 %files -n python3-%{name}

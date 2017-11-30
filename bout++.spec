@@ -175,7 +175,7 @@ export CXX=mpicxx
 for mpi in %{mpi_list}
 do
   mkdir build_$mpi
-  cp -al [^b][^u][^i]* build-aux bin ?? build_$mpi
+  cp -al [^b]* build-aux bin build_$mpi
 done
 for mpi in %{mpi_list}
 do

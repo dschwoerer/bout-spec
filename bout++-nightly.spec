@@ -52,8 +52,6 @@ BuildRequires:  python2-future
 # No openmpi on s390(x)
 %global with_openmpi 0
 %endif
-#seems to be broken :/
-%global with_openmpi 0
 
 %if %{with_mpich}
 BuildRequires:  mpich-devel

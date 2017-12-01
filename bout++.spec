@@ -1,5 +1,5 @@
 Name:           bout++
-Version:        4.1.1
+Version:        4.1.2
 Release:        1%{?dist}
 Summary:        Library for the BOUndary Turbulence simulation framework
 
@@ -7,9 +7,6 @@ Group:          Applications/Engineering
 License:        LGPLv3
 URL:            https://boutproject.github.io/
 Source0:        https://github.com/boutproject/BOUT-dev/archive/v%{version}.tar.gz#/%{name}-%{version}.tar.gz
-
-# Disable plotting PR 751
-Patch0:         tests.patch
 
 BuildRequires:  m4
 BuildRequires:  zlib-devel
@@ -33,7 +30,6 @@ BuildRequires:  python2-scipy
 
 #BuildRequires:  blas-devel
 #BuildRequires:  lapack-devel
-#Requires:     netcdf-devel
 
 %global debug_package %{nil}
 
@@ -153,8 +149,6 @@ This package contains the common files.
 
 %prep
 %setup -n BOUT-dev-%{version}
-
-%patch0 -p1
 
 autoreconf
 
@@ -321,5 +315,8 @@ done
 %license LICENSE.GPL
 
 %changelog
+* Fri Dec 01 2017 David Schwörer <schword2mail.dcu.ie> - 4.1.2-1
+- Update to new release, remove patch
+
 * Tue May 02 2017 David Schwörer <schword2mail.dcu.ie> - 4.1.1-1
 - Initial RPM release.

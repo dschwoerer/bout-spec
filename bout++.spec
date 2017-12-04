@@ -3,10 +3,9 @@ Version:        4.1.2
 Release:        1%{?dist}
 Summary:        Library for the BOUndary Turbulence simulation framework
 
-Group:          Applications/Engineering
-License:        LGPLv3
+License:        LGPLv3+
 URL:            https://boutproject.github.io/
-Source0:        https://github.com/boutproject/BOUT-dev/archive/v%{version}.tar.gz#/%{name}-%{version}.tar.gz
+Source0:        https://github.com/boutproject/BOUT-dev/archive/v%{version}/%{name}-%{version}.tar.gz
 
 BuildRequires:  m4
 BuildRequires:  zlib-devel
@@ -31,6 +30,7 @@ BuildRequires:  python2-scipy
 #BuildRequires:  blas-devel
 #BuildRequires:  lapack-devel
 
+# Disable debug package, as currently a static library is shiped
 %global debug_package %{nil}
 
 %global with_mpich 1
@@ -67,7 +67,6 @@ equations appearing in a readable form.
 %if %{with_mpich}
 %package mpich-devel
 Summary: BOUT++ mpich libraries
-Group: Development/Libraries
 Requires: mpich-devel
 Requires: netcdf-cxx4-devel
 Requires: hdf5-devel
@@ -93,7 +92,6 @@ This BOUT++ library is build for mpich.
 %if %{with_openmpi}
 %package openmpi-devel
 Summary: BOUT++ openmpi libraries
-Group: Development/Libraries
 Requires: openmpi-devel
 Requires: netcdf-devel
 Requires: hdf5-devel
@@ -116,7 +114,6 @@ This BOUT++ library is build for openmpi.
 
 %package -n python3-%{name}
 Summary: BOUT++ python library
-Group: Development/Libraries
 Requires: netcdf4-python3
 Requires: %{name}-common
 
@@ -126,7 +123,6 @@ Python3 library for pre and post processing of BOUT++ data.
 
 %package -n python2-%{name}
 Summary: BOUT++ python library
-Group: Development/Libraries
 Requires: netcdf4-python
 Requires: %{name}-common
 
@@ -135,7 +131,6 @@ Python2 library for pre and post processing of BOUT++ data.
 
 %package common
 Summary: BOUT++ python library
-Group: Development/Libraries
 
 %description  common
 BOUT++ is a framework for writing fluid and plasma simulations in

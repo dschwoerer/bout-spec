@@ -116,6 +116,7 @@ This BOUT++ library is build for openmpi.
 Summary: BOUT++ python library
 Requires: netcdf4-python3
 Requires: %{name}-common
+BuildArch: noarch
 
 %description -n python3-%{name}
 Python3 library for pre and post processing of BOUT++ data.
@@ -125,6 +126,7 @@ Python3 library for pre and post processing of BOUT++ data.
 Summary: BOUT++ python library
 Requires: netcdf4-python
 Requires: %{name}-common
+BuildArch: noarch
 
 %description -n python2-%{name}
 Python2 library for pre and post processing of BOUT++ data.
@@ -213,10 +215,10 @@ done
 pushd tools/pylib
 for d in boutdata bout_runners boututils  post_bout zoidberg
 do
-    mkdir -p ${RPM_BUILD_ROOT}/%{python3_sitearch}/$d
-    cp $d/*py ${RPM_BUILD_ROOT}/%{python3_sitearch}/$d/
-    mkdir -p ${RPM_BUILD_ROOT}/%{python2_sitearch}/$d
-    cp $d/*py ${RPM_BUILD_ROOT}/%{python2_sitearch}/$d/
+    mkdir -p ${RPM_BUILD_ROOT}/%{python3_sitelib}/$d
+    cp $d/*py ${RPM_BUILD_ROOT}/%{python3_sitelib}/$d/
+    mkdir -p ${RPM_BUILD_ROOT}/%{python2_sitelib}/$d
+    cp $d/*py ${RPM_BUILD_ROOT}/%{python2_sitelib}/$d/
 done
 # Python interface not merged upstream
 #make python3
@@ -224,11 +226,11 @@ done
 #make python2
 #install boutcore.so ${RPM_BUILD_ROOT}/%%{python2_sitearch}/
 
-for f in $(find -L ${RPM_BUILD_ROOT}/%{python3_sitearch} -executable -type f)
+for f in $(find -L ${RPM_BUILD_ROOT}/%{python3_sitelib} -executable -type f)
 do
     sed -i 's/#!\/usr\/bin\/env python/#!\/usr\/bin\/python3/' $f
 done
-for f in $(find -L ${RPM_BUILD_ROOT}/%{python2_sitearch} -executable -type f)
+for f in $(find -L ${RPM_BUILD_ROOT}/%{python2_sitelib} -executable -type f)
 do
     sed -i 's/#!\/usr\/bin\/env python/#!\/usr\/bin\/python2/' $f
 done
@@ -241,7 +243,7 @@ do
     module purge
     module load mpi/$mpi-%{_arch}
     pushd build_$mpi/tests/integrated
-    export PYTHONPATH=${RPM_BUILD_ROOT}/%{python3_sitearch}
+    export PYTHONPATH=${RPM_BUILD_ROOT}/%{python3_sitelib}
     export PYTHONIOENCODING=utf8
     ./test_suite_make  &> log || ( cat log ; exit $fail )
     ./test_suite       &> log || ( env; echo $PYTHONPATH ; cat log ; exit $fail )
@@ -252,7 +254,7 @@ do
     module purge
 done
 
-for f in $(find -L ${RPM_BUILD_ROOT}/%{python3_sitearch}/*/*\.py{c,o} -type f)
+for f in $(find -L ${RPM_BUILD_ROOT}/%{python3_sitelib}/*/*\.py{c,o} -type f)
 do
     echo cleaning $f
     rm $f
@@ -296,12 +298,12 @@ done
 %endif
 
 %files -n python3-%{name}
-%dir %{python3_sitearch}/*
-%{python3_sitearch}/*/*
+%dir %{python3_sitelib}/*
+%{python3_sitelib}/*/*
 
 %files -n python2-%{name}
-%dir %{python2_sitearch}/*
-%{python2_sitearch}/*/*
+%dir %{python2_sitelib}/*
+%{python2_sitelib}/*/*
 
 %files common
 %doc README.md

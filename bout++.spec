@@ -133,6 +133,7 @@ Python2 library for pre and post processing of BOUT++ data.
 
 %package common
 Summary: BOUT++ python library
+BuildArch: noarch
 
 %description  common
 BOUT++ is a framework for writing fluid and plasma simulations in

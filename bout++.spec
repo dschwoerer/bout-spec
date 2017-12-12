@@ -221,11 +221,6 @@ do
     mkdir -p ${RPM_BUILD_ROOT}/%{python2_sitelib}/$d
     cp $d/*py ${RPM_BUILD_ROOT}/%{python2_sitelib}/$d/
 done
-# Python interface not merged upstream
-#make python3
-#install boutcore.*.so ${RPM_BUILD_ROOT}/%%{python3_sitearch}/
-#make python2
-#install boutcore.so ${RPM_BUILD_ROOT}/%%{python2_sitearch}/
 
 for f in $(find -L ${RPM_BUILD_ROOT}/%{python3_sitelib} -executable -type f)
 do

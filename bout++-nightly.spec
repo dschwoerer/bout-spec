@@ -1,16 +1,16 @@
 %global git 1
-%global commit 64a65ddee94a6d417f637fa3f80a0849528d4aac
+%global commit f79f5587f72230bab08c4af117738258b469555c
 %global shortcommit %(c=%{commit}; echo ${c:0:7})
 
 Name:           bout++-nightly
-Version:        4.1.1
-Release:        20171130git%{shortcommit}%{?dist}
+Version:        4.1.2
+Release:        20171212git%{shortcommit}%{?dist}
 Summary:        Library for the BOUndary Turbulence simulation framework
 
 Group:          Applications/Engineering
 License:        LGPLv3
 URL:            https://boutproject.github.io/
-Source0:        https://github.com/dschwoerer/BOUT-dev/archive/%{commit}.tar.gz#/%{name}-%{version}.tar.gz
+Source0:        https://github.com/dschwoerer/BOUT-dev/archive/%{commit}/%{name}-%{version}.tar.gz
 
 # Disable plotting PR 751
 #Patch0:         fix.patch
@@ -27,8 +27,8 @@ BuildRequires:  fftw-devel
 BuildRequires:  make
 BuildRequires:  python3
 BuildRequires:  python3-h5py
-BuildRequires:  python3-netcdf4
 BuildRequires:  python3-numpy
+BuildRequires:  python3-netcdf4
 BuildRequires:  python3-scipy
 BuildRequires:  python3-Cython
 BuildRequires:  python2
@@ -38,8 +38,8 @@ BuildRequires:  python2-netcdf4
 BuildRequires:  python2-scipy
 BuildRequires:  python2-Cython
 BuildRequires:  python2-future
-
-%global debug_package %{nil}
+BuildRequires:  blas-devel
+BuildRequires:  lapack-devel
 
 %global with_mpich 1
 %global with_openmpi 1
@@ -53,7 +53,9 @@ BuildRequires:  python2-future
 # No openmpi on s390(x)
 %global with_openmpi 0
 %endif
-# openmpi is broken. Python run fails 
+# openmpi is broken. Python run fails
+# Should be fixed in openmpi 3.0.x
+# https://github.com/open-mpi/ompi/issues/3705
 %global with_openmpi 0
 
 %if %{with_mpich}
@@ -75,17 +77,17 @@ equations appearing in a readable form.
 
 
 %if %{with_mpich}
+%package mpich
+Requires: %{name}-common
+Summary: BOUT++ mpich libraries
 %package mpich-devel
 Summary: BOUT++ mpich libraries
-Group: Development/Libraries
 Requires: mpich-devel
 Requires: netcdf-cxx4-devel
 Requires: hdf5-devel
 Requires: fftw-devel
-Requires: %{name}-common
+Requires: %{name}-mpich = %{version}-%{release}
 Requires: make
-Provides: %{name}-mpich = %{version}-%{release}
-Provides: %{name}-mpich-static = %{version}-%{release}
 
 %description mpich-devel
 BOUT++ is a framework for writing fluid and plasma simulations in
@@ -97,25 +99,35 @@ equations appearing in a readable form.
 
 This BOUT++ library is build for mpich.
 
+%description mpich
+BOUT++ is a framework for writing fluid and plasma simulations in
+curvilinear geometry. It is intended to be quite modular, with a
+variety of numerical methods and time-integration solvers available.
+BOUT++ is primarily designed and tested with reduced plasma fluid
+models in mind, but it can evolve any number of equations, with
+equations appearing in a readable form.
+
+This BOUT++ library is build for mpich.
+
 %package -n python3-%{name}-mpich
 Summary:  BOUT++ mpich library for python3
-Group: Development/Libraries
 Requires: %{name}-common
 Requires: python3
 Requires: mpich
 Requires: python3-mpich
 Requires: python3-numpy
+%{?python_provide:%python_provide python3-%{name}}-mpich
 %description  -n python3-%{name}-mpich
 This is the BOUT++ library python3 with mpich.
 
 %package -n python2-%{name}-mpich
 Summary:  BOUT++ mpich library for python2
-Group: Development/Libraries
 Requires: %{name}-mpich
 Requires: python2
 Requires: mpich
 Requires: python2-mpich
 Requires: python2-numpy
+%{?python_provide:%python_provide python2-%{name}}-mpich
 %description  -n python2-%{name}-mpich
 This is the BOUT++ library python2 with mpich.
 
@@ -125,7 +137,6 @@ This is the BOUT++ library python2 with mpich.
 %if %{with_openmpi}
 %package openmpi-devel
 Summary: BOUT++ openmpi libraries
-Group: Development/Libraries
 Requires: openmpi-devel
 Requires: netcdf-devel
 Requires: hdf5-devel
@@ -146,23 +157,25 @@ This BOUT++ library is build for openmpi.
 
 %package -n python3-%{name}-openmpi
 Summary:  BOUT++ mpich library for python3
-Group: Development/Libraries
 Requires: %{name}-common
 Requires: python3
 Requires: openmpi
 Requires: python3-openmpi
 Requires: python3-numpy
+%{?python_provide:%python_provide python3-%{name}}-openmpi
+
 %description  -n python3-%{name}-openmpi
 This is the BOUT++ library python3 with openmpi.
 
 %package -n python2-%{name}-openmpi
 Summary:  BOUT++ mpich library for python2
-Group: Development/Libraries
+
 Requires: %{name}-mpich
 Requires: python2
 Requires: openmpi
 Requires: python2-openmpi
 Requires: python2-numpy
+%{?python_provide:%python_provide python2-%{name}}-openmpi
 %description  -n python2-%{name}-openmpi
 This is the BOUT++ library python2 with openmpi.
 
@@ -172,9 +185,10 @@ This is the BOUT++ library python2 with openmpi.
 
 %package -n python3-%{name}
 Summary: BOUT++ python library
-Group: Development/Libraries
 Requires: netcdf4-python3
 Requires: %{name}-common
+BuildArch: noarch
+%{?python_provide:%python_provide python3-%{name}}
 
 %description -n python3-%{name}
 Python3 library for pre and post processing of BOUT++ data.
@@ -182,17 +196,18 @@ Python3 library for pre and post processing of BOUT++ data.
 
 %package -n python2-%{name}
 Summary: BOUT++ python library
-Group: Development/Libraries
 Requires: netcdf4-python
 Requires: %{name}-common
+BuildArch: noarch
+%{?python_provide:%python_provide python2-%{name}}
 
 %description -n python2-%{name}
 Python2 library for pre and post processing of BOUT++ data.
 
 %package common
 Summary: BOUT++ python library
-Group: Development/Libraries
-Conflicts: bout++-common
+BuildArch: noarch
+Conflicts: bout-common
 %description  common
 BOUT++ is a framework for writing fluid and plasma simulations in
 curvilinear geometry. It is intended to be quite modular, with a
@@ -204,9 +219,7 @@ equations appearing in a readable form.
 This package contains the common files.
 
 %prep
-%setup -n BOUT-dev-%{commit}
-
-#%%patch0 -p1
+%setup -q -n BOUT-dev-%{commit}
 
 autoreconf
 
@@ -215,12 +228,10 @@ autoreconf
            --with-netcdf \\\
            --with-hdf5 \\\
            --enable-optimize=3 \\\
-           CXXFLAGS="-fPIC"  CFLAGS=-fPIC
+           CXXFLAGS="-Wno-unknown-pragmas" \\\
+           --enable-shared
 
 %{nil}
-
-#           --enable-debug \\\
-#           --with-petsc=/home/dave/rpmbuild/petsc/petsc-3.7.5/buildmpich_dir/ \\\
 
 # MPI builds
 export CC=mpicc
@@ -256,7 +267,8 @@ for mpi in %{mpi_list}
 do
   module purge
   module load mpi/$mpi-%{_arch}
-  make -C build_$mpi install DESTDIR=${RPM_BUILD_ROOT}
+  pushd build_$mpi
+  make install DESTDIR=${RPM_BUILD_ROOT}
   mv  ${RPM_BUILD_ROOT}/usr/share/bout++/make.config ${RPM_BUILD_ROOT}/%{_includedir}/$mpi-%{_arch}/bout++/
   echo "diff -Naur a/make.config b/make.config
 --- a/make.config       2017-05-02 23:03:57.298625399 +0100
@@ -272,17 +284,26 @@ do
  # They are used in the CXXFLAGS variable below rather than hard-coding the directories
 " | patch --no-backup-if-mismatch -p1 --fuzz=0 ${RPM_BUILD_ROOT}/%{_includedir}/${mpi}-%{_arch}/bout++/make.config
   rm -rf  ${RPM_BUILD_ROOT}/usr/share/bout++
+  rm -f ${RPM_BUILD_ROOT}/%{_libdir}/${mpi}/lib/*.a
+  make shared
+  install lib/*.so.* ${RPM_BUILD_ROOT}/%{_libdir}/${mpi}/lib/
+  pushd ${RPM_BUILD_ROOT}/%{_libdir}/${mpi}/lib/
+  for f in *.so.*
+  do
+      ln -s $f ${f%%.so*}.so
+  done
+  popd
+  popd
   module purge
 done
 
 pushd tools/pylib
-
 for d in boutdata bout_runners boututils  post_bout zoidberg
 do
-    mkdir -p ${RPM_BUILD_ROOT}/%{python3_sitearch}/$d
-    cp $d/*py ${RPM_BUILD_ROOT}/%{python3_sitearch}/$d/
-    mkdir -p ${RPM_BUILD_ROOT}/%{python2_sitearch}/$d
-    cp $d/*py ${RPM_BUILD_ROOT}/%{python2_sitearch}/$d/
+    mkdir -p ${RPM_BUILD_ROOT}/%{python3_sitelib}/$d
+    cp $d/*py ${RPM_BUILD_ROOT}/%{python3_sitelib}/$d/
+    mkdir -p ${RPM_BUILD_ROOT}/%{python2_sitelib}/$d
+    cp $d/*py ${RPM_BUILD_ROOT}/%{python2_sitelib}/$d/
 done
 popd
 
@@ -290,6 +311,8 @@ for mpi in %{mpi_list}
 do
     module purge
     module load mpi/$mpi-%{_arch}
+    LD_LIBRARY_PATH_=$LD_LIBRARY_PATH
+    export LD_LIBRARY_PATH=${RPM_BUILD_ROOT}/%{_libdir}/${mpi}/lib/:$LD_LIBRARY_PATH
     pushd build_$mpi/tools/pylib
     make python3
     mkdir -p ${RPM_BUILD_ROOT}/%{python3_sitearch}/${mpi}/
@@ -297,15 +320,16 @@ do
     make python2
     mkdir -p ${RPM_BUILD_ROOT}/%{python2_sitearch}/${mpi}/
     install boutcore.so ${RPM_BUILD_ROOT}/%{python2_sitearch}/${mpi}/
+    export LD_LIBRARY_PATH=$LD_LIBRARY_PATH_
     popd
     module purge
 done
 
-for f in $(find -L ${RPM_BUILD_ROOT}/%{python3_sitearch} -executable -type f)
+for f in $(find -L ${RPM_BUILD_ROOT}/%{python3_sitelib} -executable -type f)
 do
     sed -i 's/#!\/usr\/bin\/env python/#!\/usr\/bin\/python3/' $f
 done
-for f in $(find -L ${RPM_BUILD_ROOT}/%{python2_sitearch} -executable -type f)
+for f in $(find -L ${RPM_BUILD_ROOT}/%{python2_sitelib} -executable -type f)
 do
     sed -i 's/#!\/usr\/bin\/env python/#!\/usr\/bin\/python2/' $f
 done
@@ -318,7 +342,9 @@ do
     module purge
     module load mpi/$mpi-%{_arch}
     pushd build_$mpi/tests/integrated
-    export PYTHONPATH=${RPM_BUILD_ROOT}/%{python3_sitearch}
+    LD_LIBRARY_PATH_=$LD_LIBRARY_PATH
+    export LD_LIBRARY_PATH=${RPM_BUILD_ROOT}/%{_libdir}/${mpi}/lib/:$LD_LIBRARY_PATH
+    export PYTHONPATH=${RPM_BUILD_ROOT}/%{python3_sitelib}
     alias python=python3
     export PYTHONIOENCODING=utf8
     ./test_suite_make  &> log || ( cat log ; exit $fail )
@@ -326,22 +352,24 @@ do
     popd
     pushd build_$mpi/tests/MMS
     ./test_suite       &> log || ( cat log ; exit $fail )
+    export LD_LIBRARY_PATH=$LD_LIBRARY_PATH_
     popd
     module purge
 done
 
-for f in $(find -L ${RPM_BUILD_ROOT}/%{python3_sitearch}/*/*\.py{c,o} -type f)
+for f in $(find -L ${RPM_BUILD_ROOT}/%{python3_sitelib}/*/*\.py{c,o} -type f)
 do
     echo cleaning $f
     rm $f
 done
 
 
-%post -p /sbin/ldconfig
-
-%postun -p /sbin/ldconfig
 
 %if %{with_mpich}
+%post mpich -p /sbin/ldconfig
+%postun mpich -p /sbin/ldconfig
+%files mpich
+%{_libdir}/mpich/lib/*.so.*
 %files mpich-devel
 %dir %{_includedir}/mpich-%{_arch}/bout++
 %dir %{_includedir}/mpich-%{_arch}/bout++/bout
@@ -353,7 +381,7 @@ done
 %{_includedir}/mpich-%{_arch}/bout++/bout/invert/*.hxx
 %{_includedir}/mpich-%{_arch}/bout++/bout/sys/*.hxx
 %{_includedir}/mpich-%{_arch}/bout++/pvode/*.h
-%{_libdir}/mpich/lib/*.a
+%{_libdir}/mpich/lib/*.so
 %{_libdir}/mpich/bin/*
 %files -n python3-%{name}-mpich
 %{python3_sitearch}/mpich/*
@@ -362,18 +390,20 @@ done
 %endif
 
 %if %{with_openmpi}
+%files openmpi
+%{_libdir}/openmpi/lib/*.so.*
 %files openmpi-devel
 %dir %{_includedir}/openmpi-%{_arch}/bout++
 %dir %{_includedir}/openmpi-%{_arch}/bout++/bout
 %dir %{_includedir}/openmpi-%{_arch}/bout++/bout/invert
 %dir %{_includedir}/openmpi-%{_arch}/bout++/bout/sys
 %{_includedir}/openmpi-%{_arch}/bout++/*.hxx
-%{_includedir}/openmpi-%{_arch}/bout++/make.config
 %{_includedir}/openmpi-%{_arch}/bout++/bout/*.hxx
+%{_includedir}/openmpi-%{_arch}/bout++/make.config
 %{_includedir}/openmpi-%{_arch}/bout++/bout/invert/*.hxx
 %{_includedir}/openmpi-%{_arch}/bout++/bout/sys/*.hxx
 %{_includedir}/openmpi-%{_arch}/bout++/pvode/*.h
-%{_libdir}/openmpi/lib/*.a
+%{_libdir}/openmpi/lib/*.so
 %{_libdir}/openmpi/bin/*
 %files -n python3-%{name}-openmpi
 %{python3_sitearch}/openmpi/*
@@ -382,12 +412,12 @@ done
 %endif
 
 %files -n python3-%{name}
-%dir %{python3_sitearch}/[^om]*
-%{python3_sitearch}/[^om]*/*
+%dir %{python3_sitelib}/*
+%{python3_sitelib}/*/*
 
 %files -n python2-%{name}
-%dir %{python2_sitearch}/[^om]*
-%{python2_sitearch}/[^om]*/*
+%dir %{python2_sitelib}/*
+%{python2_sitelib}/*/*
 
 %files common
 %doc README.md
@@ -397,5 +427,8 @@ done
 %license LICENSE.GPL
 
 %changelog
+* Tue Dec 12 2017 David Schwörer <schword2mail.dcu.ie> - 4.1.2-1
+- Update to new release, remove patch
+
 * Tue May 02 2017 David Schwörer <schword2mail.dcu.ie> - 4.1.1-1
 - Initial RPM release.

@@ -1,6 +1,6 @@
 Name:           bout++
 Version:        4.1.2
-Release:        1%{?dist}
+Release:        2%{?dist}
 Summary:        Library for the BOUndary Turbulence simulation framework
 
 License:        LGPLv3+
@@ -117,6 +117,7 @@ Summary: BOUT++ python library
 Requires: netcdf4-python3
 Requires: %{name}-common
 BuildArch: noarch
+%{?python_provide:%python_provide python3-%{name}}
 
 %description -n python3-%{name}
 Python3 library for pre and post processing of BOUT++ data.
@@ -127,6 +128,7 @@ Summary: BOUT++ python library
 Requires: netcdf4-python
 Requires: %{name}-common
 BuildArch: noarch
+%{?python_provide:%python_provide python2-%{name}}
 
 %description -n python2-%{name}
 Python2 library for pre and post processing of BOUT++ data.
@@ -156,9 +158,6 @@ autoreconf
            --with-hdf5
 
 %{nil}
-
-#           --enable-debug \\\
-#           --with-petsc=/home/dave/rpmbuild/petsc/petsc-3.7.5/buildmpich_dir/ \\\
 
 # MPI builds
 export CC=mpicc
@@ -309,6 +308,9 @@ done
 %license LICENSE.GPL
 
 %changelog
+* Fri Dec 12 2017 David Schwörer <schword2mail.dcu.ie> - 4.1.2-2
+- Add missing python_provide macro
+
 * Fri Dec 01 2017 David Schwörer <schword2mail.dcu.ie> - 4.1.2-1
 - Update to new release, remove patch
 

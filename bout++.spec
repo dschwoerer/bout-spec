@@ -308,7 +308,7 @@ done
 %license LICENSE.GPL
 
 %changelog
-* Fri Dec 12 2017 David Schwörer <schword2mail.dcu.ie> - 4.1.2-2
+* Tue Dec 12 2017 David Schwörer <schword2mail.dcu.ie> - 4.1.2-2
 - Add missing python_provide macro
 
 * Fri Dec 01 2017 David Schwörer <schword2mail.dcu.ie> - 4.1.2-1

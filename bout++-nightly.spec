@@ -116,7 +116,7 @@ Requires: python3
 Requires: mpich
 Requires: python3-mpich
 Requires: python3-numpy
-%{?python_provide:%python_provide python3-%{name}}-mpich
+%{?python_provide:%python_provide python3-%{name}-mpich}
 %description  -n python3-%{name}-mpich
 This is the BOUT++ library python3 with mpich.
 
@@ -127,7 +127,7 @@ Requires: python2
 Requires: mpich
 Requires: python2-mpich
 Requires: python2-numpy
-%{?python_provide:%python_provide python2-%{name}}-mpich
+%{?python_provide:%python_provide python2-%{name}-mpich}
 %description  -n python2-%{name}-mpich
 This is the BOUT++ library python2 with mpich.
 
@@ -162,7 +162,7 @@ Requires: python3
 Requires: openmpi
 Requires: python3-openmpi
 Requires: python3-numpy
-%{?python_provide:%python_provide python3-%{name}}-openmpi
+%{?python_provide:%python_provide python3-%{name}-openmpi}
 
 %description  -n python3-%{name}-openmpi
 This is the BOUT++ library python3 with openmpi.
@@ -175,7 +175,7 @@ Requires: python2
 Requires: openmpi
 Requires: python2-openmpi
 Requires: python2-numpy
-%{?python_provide:%python_provide python2-%{name}}-openmpi
+%{?python_provide:%python_provide python2-%{name}-openmpi}
 %description  -n python2-%{name}-openmpi
 This is the BOUT++ library python2 with openmpi.
 

@@ -1,10 +1,10 @@
 %global git 1
-%global commit a7968f5dcf028bc96d0dd3ca7aae5192938af7df
+%global commit b142b2ab869d784f69e622e1429c2c41c6b7fb13
 %global shortcommit %(c=%{commit}; echo ${c:0:7})
 
 Name:           bout++-nightly
 Version:        4.1.2
-Release:        20171219git%{shortcommit}%{?dist}
+Release:        20180117git%{shortcommit}%{?dist}
 Summary:        Library for the BOUndary Turbulence simulation framework
 
 Group:          Applications/Engineering
@@ -427,6 +427,9 @@ done
 %license LICENSE.GPL
 
 %changelog
+* Wed Jan 17 2018 David Schwörer <schword2mail.dcu.ie> - 4.1.2-20180117gitb142b2a
+- Update to version 4.1.2 - b142b2a
+
 * Tue Dec 19 2017 David Schwörer <schword2mail.dcu.ie> - 4.1.2-20171219gita7968f5
 - Update to version a7968f5
 

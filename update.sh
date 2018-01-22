@@ -1,16 +1,18 @@
 # name of the spec file
-if [ "$1" ]
+name=$(ls *spec)
+if test $(echo $name|wc -w) -gt 1
 then
-    name="$1"
-else
-    name=bout++-nightly
+    echo "more then one spec file found - aborting"
+    exit 3
 fi
+name=${name%.spec}
+
 # Author:
 who="David Schwörer <schword2mail.dcu.ie>"
 # Version to use
-if [ "$2" ]
+if [ "$1" ]
 then
-    vm="$2"
+    vm="$1"
 else
     vm=$(echo $(grep Version: $name.spec | cut -d: -f2))
 fi
@@ -48,3 +50,15 @@ else
     #git diff
     git commit -pm "Update $name to version $vm - $short"
 fi
+
+project=scripts
+if test $name == bout++-nightly || test $name == bout++
+then
+    project=bout
+fi
+   
+rm $name*tar.gz
+rm $name*src.rpm
+spectool -g $name.spec
+rpkg srpm
+copr-cli build $project $name*src.rpm

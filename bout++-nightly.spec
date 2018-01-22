@@ -219,7 +219,7 @@ equations appearing in a readable form.
 This package contains the common files.
 
 %prep
-%setup -q -n BOUT-dev-%{version}
+%setup -q -n BOUT-dev-%{commit}
 
 autoreconf
 

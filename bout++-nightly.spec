@@ -60,10 +60,12 @@ BuildRequires:  lapack-devel
 
 %if %{with_mpich}
 BuildRequires:  mpich-devel
+BuildRequires:  python3-mpi4py-mpich
 %global mpi_list mpich
 %endif
 %if %{with_openmpi}
 BuildRequires:  openmpi-devel
+BuildRequires:  python3-mpi4py-openmpi
 %global mpi_list %{?mpi_list} openmpi
 %endif
 
@@ -427,6 +429,9 @@ done
 %license LICENSE.GPL
 
 %changelog
+* Tue Feb 06 2018 David Schwörer <schword2mail.dcu.ie> - 4.1.2-20180206git83b2b3d
+- Add mpi4py requirement
+
 * Tue Feb 06 2018 David Schwörer <schword2mail.dcu.ie> - 4.1.2-20180206git83b2b3d
 - Update to version 4.1.2 - 83b2b3d
 

@@ -1,5 +1,5 @@
 %global git 1
-%global commit 0f8ad4998a2e5559f81df2368a6e9fba7e274af1
+%global commit 595da719cefe672bac21ba021c81deae8c3a0eb5
 %global shortcommit %(c=%{commit}; echo ${c:0:7})
 
 Name:           bout++-nightly
@@ -427,17 +427,10 @@ done
 %license LICENSE.GPL
 
 %changelog
-* Tue Feb 13 2018 David Schwörer <schword2mail.dcu.ie> - 4.1.2-20180213git0f8ad49
-- Update to version 4.1.2 - 0f8ad49
+* Tue Feb 13 2018 David Schwörer <schword2mail.dcu.ie> - 4.1.2-20180213git595da71
+- Update to version 4.1.2 - 595da71
 
-* Tue Feb 13 2018 David Schwörer <schword2mail.dcu.ie> - 4.1.2-20180213git42d70f5
-- Update to version 4.1.2 - 42d70f5
-
-* Tue Feb 13 2018 David Schwörer <schword2mail.dcu.ie> - 4.1.2-20180213gite8ad0b1
-- Update to version 4.1.2 - e8ad0b1
-
-* Tue Feb 06 2018 David Schwörer <schword2mail.dcu.ie> - 4.1.2-20180206git83b2b3d
-- Add mpi4py requirement
+- Add boutcore path for test suite
 
 * Tue Feb 06 2018 David Schwörer <schword2mail.dcu.ie> - 4.1.2-20180206git83b2b3d
 - Update to version 4.1.2 - 83b2b3d

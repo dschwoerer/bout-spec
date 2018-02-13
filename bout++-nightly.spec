@@ -1,10 +1,10 @@
 %global git 1
-%global commit 83b2b3d76cc2230daad80bb4ab428c7062016afc
+%global commit e8ad0b1903a7c0e7718d1574dee6d47c1fece3ac
 %global shortcommit %(c=%{commit}; echo ${c:0:7})
 
 Name:           bout++-nightly
 Version:        4.1.2
-Release:        20180206git%{shortcommit}%{?dist}
+Release:        20180213git%{shortcommit}%{?dist}
 Summary:        Library for the BOUndary Turbulence simulation framework
 
 Group:          Applications/Engineering
@@ -60,12 +60,10 @@ BuildRequires:  lapack-devel
 
 %if %{with_mpich}
 BuildRequires:  mpich-devel
-BuildRequires:  python3-mpi4py-mpich
 %global mpi_list mpich
 %endif
 %if %{with_openmpi}
 BuildRequires:  openmpi-devel
-BuildRequires:  python3-mpi4py-openmpi
 %global mpi_list %{?mpi_list} openmpi
 %endif
 
@@ -346,7 +344,7 @@ do
     pushd build_$mpi/tests/integrated
     LD_LIBRARY_PATH_=$LD_LIBRARY_PATH
     export LD_LIBRARY_PATH=${RPM_BUILD_ROOT}/%{_libdir}/${mpi}/lib/:$LD_LIBRARY_PATH
-    export PYTHONPATH=${RPM_BUILD_ROOT}/%{python3_sitelib}
+    export PYTHONPATH=${RPM_BUILD_ROOT}/%{python3_sitelib}:${RPM_BUILD_ROOT}/%{python3_sitearch}/${mpi}/
     alias python=python3
     export PYTHONIOENCODING=utf8
     ./test_suite_make  &> log || ( cat log ; exit $fail )
@@ -429,6 +427,9 @@ done
 %license LICENSE.GPL
 
 %changelog
+* Tue Feb 13 2018 David Schwörer <schword2mail.dcu.ie> - 4.1.2-20180213gite8ad0b1
+- Update to version 4.1.2 - e8ad0b1
+
 * Tue Feb 06 2018 David Schwörer <schword2mail.dcu.ie> - 4.1.2-20180206git83b2b3d
 - Add mpi4py requirement
 

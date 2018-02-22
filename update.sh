@@ -61,4 +61,8 @@ rm $name*tar.gz
 rm $name*src.rpm
 spectool -g $name.spec
 rpkg srpm
-copr-cli build $project $name*src.rpm
+
+fedpkg --release f$(uname -r|cut -f2 -dc|cut -d. -f1) --module-name bout++-nightly  local || exit
+fedpkg --release f27 --module-name bout++-nightly  mock || exit
+
+echo copr-cli build $project $name*src.rpm

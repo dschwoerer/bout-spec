@@ -1,5 +1,5 @@
 %global git 1
-%global commit 492b9e93e52c6868aaf79e0cdc7572a553ebc180
+%global commit c3df835e8ef4c9db639eeba196541bc6c4a42ebe
 %global shortcommit %(c=%{commit}; echo ${c:0:7})
 
 Name:           bout++-nightly
@@ -40,6 +40,40 @@ BuildRequires:  python2-Cython
 BuildRequires:  python2-future
 BuildRequires:  blas-devel
 BuildRequires:  lapack-devel
+# cxx generation
+BuildRequires:  python3-jinja2
+# Documentation
+BuildRequires:  python3-sphinx
+BuildRequires:  latexmk
+BuildRequires:  texlive-fncychap
+BuildRequires:  texlive-tabulary
+BuildRequires:  texlive-cm
+BuildRequires:  texlive-hyphen-base
+BuildRequires:  texlive-cmap
+BuildRequires:  texlive-ec
+BuildRequires:  texlive-babel-english
+BuildRequires:  texlive-fancyhdr
+BuildRequires:  texlive-titlesec
+BuildRequires:  texlive-framed
+BuildRequires:  texlive-threeparttable
+BuildRequires:  texlive-mdwtools
+BuildRequires:  texlive-wrapfig
+BuildRequires:  texlive-parskip
+BuildRequires:  texlive-upquote
+BuildRequires:  texlive-capt-of
+#BuildRequires:  texlive-needspace
+BuildRequires:  texlive-oberdiek
+BuildRequires:  texlive-geometry
+BuildRequires:  texlive-multirow
+#BuildRequires:  texlive-eqparbox
+BuildRequires:  texlive-hyperref
+BuildRequires:  texlive-times
+BuildRequires:  texlive-helvetic
+BuildRequires:  texlive-courier
+BuildRequires:  texlive-gsftopk-bin
+BuildRequires:  texlive-updmap-map
+BuildRequires:  texlive-dvips
+BuildRequires:  texlive-makeindex-bin
 
 %global with_mpich 1
 %global with_openmpi 1
@@ -187,22 +221,42 @@ This is the BOUT++ library python2 with openmpi.
 Summary: BOUT++ python library
 Requires: netcdf4-python3
 Requires: %{name}-common
+Requires: python3-numpy
+Suggests: python3-scipy
 BuildArch: noarch
 %{?python_provide:%python_provide python3-%{name}}
 
 %description -n python3-%{name}
-Python3 library for pre and post processing of BOUT++ data.
+Python3 library for pre and post processing of BOUT++ data
 
 
 %package -n python2-%{name}
 Summary: BOUT++ python library
 Requires: netcdf4-python
 Requires: %{name}-common
+Requires: python2-numpy
+Suggests: python2-scipy
 BuildArch: noarch
 %{?python_provide:%python_provide python2-%{name}}
 
 %description -n python2-%{name}
 Python2 library for pre and post processing of BOUT++ data.
+
+%package -n %{name}-doc
+Summary: BOUT++ Documentation
+Requires: %{name}-common
+BuildArch: noarch
+
+%description -n %{name}-doc
+BOUT++ is a framework for writing fluid and plasma simulations in
+curvilinear geometry. It is intended to be quite modular, with a
+variety of numerical methods and time-integration solvers available.
+BOUT++ is primarily designed and tested with reduced plasma fluid
+models in mind, but it can evolve any number of equations, with
+equations appearing in a readable form.
+
+This package contains the documentation.
+
 
 %package common
 Summary: BOUT++ python library
@@ -255,7 +309,12 @@ do
     --includedir=%{_includedir}/$mpi-%{_arch} \
     --datarootdir=%{_libdir}/$mpi/share \
     --mandir=%{_libdir}/$mpi/share/man
-  make %{?_smp_mflags}
+  make %{?_smp_mflags} shared
+  echo $LD_LIBRARY_PATH
+  export LD_LIBRARY_PATH=$(pwd)/lib
+  make %{?_smp_mflags} python
+  make %{?_smp_mflags} python2
+  make %{?_smp_mflags} -C manual html man pdf
   module purge
   popd
 done
@@ -285,7 +344,6 @@ do
 " | patch --no-backup-if-mismatch -p1 --fuzz=0 ${RPM_BUILD_ROOT}/%{_includedir}/${mpi}-%{_arch}/bout++/make.config
   rm -rf  ${RPM_BUILD_ROOT}/usr/share/bout++
   rm -f ${RPM_BUILD_ROOT}/%{_libdir}/${mpi}/lib/*.a
-  make shared
   install lib/*.so.* ${RPM_BUILD_ROOT}/%{_libdir}/${mpi}/lib/
   pushd ${RPM_BUILD_ROOT}/%{_libdir}/${mpi}/lib/
   for f in *.so.*
@@ -297,6 +355,7 @@ do
   module purge
 done
 
+# install bout libraries
 pushd tools/pylib
 for d in boutdata bout_runners boututils  post_bout zoidberg
 do
@@ -306,25 +365,26 @@ do
     cp $d/*py ${RPM_BUILD_ROOT}/%{python2_sitelib}/$d/
 done
 popd
+mandir=$(ls build_*/manual -d|head -n1)
+mkdir -p ${RPM_BUILD_ROOT}/%{_mandir}/man1/
+install -m 644 $mandir/man/bout.1 ${RPM_BUILD_ROOT}/%{_mandir}/man1/bout++.1
+mkdir -p ${RPM_BUILD_ROOT}/%{_defaultdocdir}/bout++/
+rm -rf $mandir/html/.buildinfo
+rm -rf $mandir/html/.doctrees
+rm -rf $mandir/html/_sources
+cp -r $mandir/html ${RPM_BUILD_ROOT}/%{_defaultdocdir}/bout++/
 
+
+# install boutcore library
 for mpi in %{mpi_list}
 do
-    module purge
-    module load mpi/$mpi-%{_arch}
-    LD_LIBRARY_PATH_=$LD_LIBRARY_PATH
-    export LD_LIBRARY_PATH=${RPM_BUILD_ROOT}/%{_libdir}/${mpi}/lib/:$LD_LIBRARY_PATH
-    pushd build_$mpi/tools/pylib
-    make python3
     mkdir -p ${RPM_BUILD_ROOT}/%{python3_sitearch}/${mpi}/
-    install boutcore.*.so ${RPM_BUILD_ROOT}/%{python3_sitearch}/${mpi}/
-    make python2
+    install build_$mpi/tools/pylib/boutcore.*.so ${RPM_BUILD_ROOT}/%{python3_sitearch}/${mpi}/
     mkdir -p ${RPM_BUILD_ROOT}/%{python2_sitearch}/${mpi}/
-    install boutcore.so ${RPM_BUILD_ROOT}/%{python2_sitearch}/${mpi}/
-    export LD_LIBRARY_PATH=$LD_LIBRARY_PATH_
-    popd
-    module purge
+    install build_$mpi/tools/pylib/boutcore.so ${RPM_BUILD_ROOT}/%{python2_sitearch}/${mpi}/
 done
 
+# Fix python interpreter for libraries
 for f in $(find -L ${RPM_BUILD_ROOT}/%{python3_sitelib} -executable -type f)
 do
     sed -i 's/#!\/usr\/bin\/env python/#!\/usr\/bin\/python3/' $f
@@ -332,6 +392,7 @@ done
 for f in $(find -L ${RPM_BUILD_ROOT}/%{python2_sitelib} -executable -type f)
 do
     sed -i 's/#!\/usr\/bin\/env python/#!\/usr\/bin\/python2/' $f
+    sed -i 's/#!\/usr\/bin\/python2/#!\/usr\/bin\/python2/' $f
 done
 
 %check
@@ -347,11 +408,11 @@ do
     export PYTHONPATH=${RPM_BUILD_ROOT}/%{python3_sitelib}:${RPM_BUILD_ROOT}/%{python3_sitearch}/${mpi}/
     alias python=python3
     export PYTHONIOENCODING=utf8
-    ./test_suite_make  &> log || ( cat log ; exit $fail )
-    ./test_suite       &> log || ( env; echo $PYTHONPATH ; cat log ; exit $fail )
+    ./test_suite_make  || exit $fail
+    ./test_suite       || exit $fail
     popd
     pushd build_$mpi/tests/MMS
-    ./test_suite       &> log || ( cat log ; exit $fail )
+    ./test_suite       || exit $fail
     export LD_LIBRARY_PATH=$LD_LIBRARY_PATH_
     popd
     module purge
@@ -419,6 +480,10 @@ done
 %dir %{python2_sitelib}/*
 %{python2_sitelib}/*/*
 
+%files -n %{name}-doc
+%doc %{_mandir}/man1/bout++*
+%doc  %{_defaultdocdir}/bout++/
+
 %files common
 %doc README.md
 %doc CITATION
@@ -427,6 +492,11 @@ done
 %license LICENSE.GPL
 
 %changelog
+* Thu Feb 22 2018 David Schwörer <schword2mail.dcu.ie> - 4.1.2-20180222gitc3df835
+- Update to version 4.1.2 - c3df835
+
+- Add documentation package
+
 * Thu Feb 22 2018 David Schwörer <schword2mail.dcu.ie> - 4.1.2-20180222git492b9e9
 - Update to version 4.1.2 - 492b9e9
 
@@ -435,7 +505,6 @@ done
 
 * Tue Feb 13 2018 David Schwörer <schword2mail.dcu.ie> - 4.1.2-20180213git595da71
 - Update to version 4.1.2 - 595da71
-
 - Add boutcore path for test suite
 
 * Tue Feb 06 2018 David Schwörer <schword2mail.dcu.ie> - 4.1.2-20180206git83b2b3d

@@ -56,13 +56,14 @@ if test $name == bout++-nightly || test $name == bout++
 then
     project=bout
 fi
-   
+
 rm $name*tar.gz
 rm $name*src.rpm
+set -e
 spectool -g $name.spec
 rpkg srpm
 
-fedpkg --release f$(uname -r|cut -f2 -dc|cut -d. -f1) --module-name bout++-nightly  local || exit
-fedpkg --release f27 --module-name bout++-nightly  mock || exit
+echo fedpkg --release f$(uname -r|cut -f2 -dc|cut -d. -f1) --module-name $name  local
+echo fedpkg --release f27 --module-name $name  mockbuild
 
 echo copr-cli build $project $name*src.rpm

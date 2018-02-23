@@ -1,10 +1,10 @@
 %global git 1
-%global commit c3df835e8ef4c9db639eeba196541bc6c4a42ebe
+%global commit 95745b97af4687d51de9400ace7537fc71b23608
 %global shortcommit %(c=%{commit}; echo ${c:0:7})
 
 Name:           bout++-nightly
 Version:        4.1.2
-Release:        20180222git%{shortcommit}%{?dist}
+Release:        20180223git%{shortcommit}%{?dist}
 Summary:        Library for the BOUndary Turbulence simulation framework
 
 Group:          Applications/Engineering
@@ -61,11 +61,11 @@ BuildRequires:  texlive-wrapfig
 BuildRequires:  texlive-parskip
 BuildRequires:  texlive-upquote
 BuildRequires:  texlive-capt-of
-#BuildRequires:  texlive-needspace
+BuildRequires:  texlive-needspace
 BuildRequires:  texlive-oberdiek
 BuildRequires:  texlive-geometry
 BuildRequires:  texlive-multirow
-#BuildRequires:  texlive-eqparbox
+BuildRequires:  texlive-eqparbox
 BuildRequires:  texlive-hyperref
 BuildRequires:  texlive-times
 BuildRequires:  texlive-helvetic
@@ -492,6 +492,9 @@ done
 %license LICENSE.GPL
 
 %changelog
+* Fri Feb 23 2018 David Schwörer <schword2mail.dcu.ie> - 4.1.2-20180223git95745b9
+- Update to version 4.1.2 - 95745b9
+
 * Thu Feb 22 2018 David Schwörer <schword2mail.dcu.ie> - 4.1.2-20180222gitc3df835
 - Update to version 4.1.2 - c3df835
 

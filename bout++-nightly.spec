@@ -44,6 +44,8 @@ BuildRequires:  lapack-devel
 BuildRequires:  python3-jinja2
 # Documentation
 BuildRequires:  python3-sphinx
+%global with_pdf 0
+%if %{with_pdf}
 BuildRequires:  latexmk
 BuildRequires:  texlive-fncychap
 BuildRequires:  texlive-tabulary
@@ -74,6 +76,7 @@ BuildRequires:  texlive-gsftopk-bin
 BuildRequires:  texlive-updmap-map
 BuildRequires:  texlive-dvips
 BuildRequires:  texlive-makeindex-bin
+%{endif}
 
 %global with_mpich 1
 %global with_openmpi 1
@@ -314,7 +317,10 @@ do
   export LD_LIBRARY_PATH=$(pwd)/lib
   make %{?_smp_mflags} python
   make %{?_smp_mflags} python2
-  make %{?_smp_mflags} -C manual html man pdf
+  %if %{with_pdf}
+  make %{?_smp_mflags} -C manual pdf
+  %endif
+  make %{?_smp_mflags} -C manual html man
   module purge
   popd
 done

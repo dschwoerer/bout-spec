@@ -1,5 +1,5 @@
 %global git 1
-%global commit f380cfb224ef92e26e3d6c9d61158f9d497be3b8
+%global commit ccd4104bc2ff8c0e186a5087b0c23dcb9649add5
 %global shortcommit %(c=%{commit}; echo ${c:0:7})
 
 Name:           bout++-nightly
@@ -492,6 +492,9 @@ done
 %license LICENSE.GPL
 
 %changelog
+* Sat Mar 24 2018 David Schwörer <schword2mail.dcu.ie> - 4.1.2-20180324gitccd4104
+- Update to version 4.1.2 - ccd4104
+
 * Sat Mar 24 2018 David Schwörer <schword2mail.dcu.ie> - 4.1.2-20180324gitf380cfb
 - Update to version 4.1.2 - f380cfb
 

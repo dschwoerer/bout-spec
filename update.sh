@@ -63,7 +63,7 @@ set -e
 spectool -g $name.spec
 rpkg srpm
 
-echo fedpkg --release f$(uname -r|cut -f2 -dc|cut -d. -f1) --module-name $name  local
-echo fedpkg --release f27 --module-name $name  mockbuild
+fedpkg --release f$(uname -r|cut -f2 -dc|cut -d. -f1) --module-name $name  local
+fedpkg --release f27 --module-name $name  mockbuild
 
-echo copr-cli build $project $name*src.rpm
+copr-cli build $project $name*src.rpm

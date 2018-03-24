@@ -1,5 +1,5 @@
 %global git 1
-%global commit 349a246e19117eb1db63a088a9697e10ebb76621
+%global commit b99bb53719c7f08bdfacd414ad0089b34ebbbedb
 %global shortcommit %(c=%{commit}; echo ${c:0:7})
 
 Name:           bout++-nightly
@@ -492,6 +492,9 @@ done
 %license LICENSE.GPL
 
 %changelog
+* Sat Mar 24 2018 David Schwörer <schword2mail.dcu.ie> - 4.1.2-20180324gitb99bb53
+- Update to version 4.1.2 - b99bb53
+
 * Sat Mar 24 2018 David Schwörer <schword2mail.dcu.ie> - 4.1.2-20180324git349a246
 - Update to version 4.1.2 - 349a246
 

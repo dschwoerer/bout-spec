@@ -33,11 +33,8 @@ esac
 echo $version
 
 short=${version:0:7}
-if grep $version $name.spec &>/dev/null && grep "$vm" $name.spec|grep "Version:" &>/dev/null
+if ! grep $version $name.spec &>/dev/null && grep "$vm" $name.spec|grep "Version:" &>/dev/null
 then
-    echo "up to date"
-    exit 0
-else
     old=$(grep "%global commit" $name.spec)
     sed "s/$old/%global commit $version/" $name.spec -i
     ver=$(grep "Version:" $name.spec)
@@ -47,9 +44,9 @@ else
     newver=$(date +%Y%m%d)git$short
     sed -i "s/$rel/Release:        $(date +%Y%m%d)git%{shortcommit}%{?dist}/" $name.spec
     sed -i "s/%changelog/%changelog\n* $(date "+%a %b %d %Y") $who - $vm-$newver\n- Update to version $vm - $short\n/" $name.spec
-    #git diff
-    git commit -pm "Update $name to version $vm - $short"
 fi
+#git diff
+git commit -pm "Update $name to version $vm - $short"
 
 project=scripts
 if test $name == bout++-nightly || test $name == bout++

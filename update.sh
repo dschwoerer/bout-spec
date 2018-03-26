@@ -63,4 +63,4 @@ rpkg srpm
 fedpkg --release f$(uname -r|cut -f2 -dc|cut -d. -f1) --module-name $name  local
 fedpkg --release f27 --module-name $name  mockbuild
 
-copr-cli build $project $name*src.rpm
+copr-cli build $project $(ls -t $name*src.rpm|head -n 1)

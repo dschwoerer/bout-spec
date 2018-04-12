@@ -284,6 +284,8 @@ do
   export LD_LIBRARY_PATH=$(pwd)/lib
   make %{?_smp_mflags} python
   make %{?_smp_mflags} python2
+  # Workaround for PR#982
+  make %{?_smp_mflags} -C manual doxygen
   make %{?_smp_mflags} -C manual html man
   module purge
   popd

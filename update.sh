@@ -46,7 +46,6 @@ then
     sed -i "s/%changelog/%changelog\n* $(date "+%a %b %d %Y") $who - $vm-$newver\n- Update to version $vm - $short\n/" $name.spec
 fi
 #git diff
-git commit -pm "Update $name to version $vm - $short"
 
 project=scripts
 if test $name == bout++-nightly || test $name == bout++
@@ -63,4 +62,7 @@ rpkg srpm
 fedpkg --release f$(uname -r|cut -f2 -dc|cut -d. -f1) --module-name $name  local
 fedpkg --release f27 --module-name $name  mockbuild
 
+git commit -pm "Update $name to version $vm - $short"
+
 copr-cli build $project $(ls -t $name*src.rpm|head -n 1)
+

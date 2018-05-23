@@ -58,10 +58,6 @@ BuildRequires:  python3-sphinx
 # No openmpi on s390(x)
 %global with_openmpi 0
 %endif
-# openmpi is broken. Python run fails
-# Should be fixed in openmpi 3.0.x
-# https://github.com/open-mpi/ompi/issues/3705
-%global with_openmpi 0
 
 %if %{with_mpich}
 BuildRequires:  mpich-devel
@@ -116,7 +112,7 @@ This BOUT++ library is build for mpich.
 
 %package -n python3-%{name}-mpich
 Summary:  BOUT++ mpich library for python3
-Requires: %{name}-common
+Requires: %{name}-mpich
 Requires: python3
 Requires: mpich
 Requires: python3-mpich
@@ -140,17 +136,30 @@ This is the BOUT++ library python2 with mpich.
 
 
 %if %{with_openmpi}
+
+%package openmpi
+Requires: %{name}-common
+Summary: BOUT++ openmpi libraries
 %package openmpi-devel
 Summary: BOUT++ openmpi libraries
 Requires: openmpi-devel
-Requires: netcdf-devel
+Requires: netcdf-cxx4-devel
 Requires: hdf5-devel
 Requires: fftw-devel
+Requires: %{name}-openmpi = %{version}-%{release}
 Requires: make
-Requires: %{name}-common
-Provides: %{name}-openmpi = %{version}-%{release}
-Provides: %{name}-openmpi-static = %{version}-%{release}
+
 %description openmpi-devel
+BOUT++ is a framework for writing fluid and plasma simulations in
+curvilinear geometry. It is intended to be quite modular, with a
+variety of numerical methods and time-integration solvers available.
+BOUT++ is primarily designed and tested with reduced plasma fluid
+models in mind, but it can evolve any number of equations, with
+equations appearing in a readable form.
+
+This BOUT++ library is build for openmpi.
+
+%description openmpi
 BOUT++ is a framework for writing fluid and plasma simulations in
 curvilinear geometry. It is intended to be quite modular, with a
 variety of numerical methods and time-integration solvers available.
@@ -162,7 +171,7 @@ This BOUT++ library is build for openmpi.
 
 %package -n python3-%{name}-openmpi
 Summary:  BOUT++ mpich library for python3
-Requires: %{name}-common
+Requires: %{name}-openmpi
 Requires: python3
 Requires: openmpi
 Requires: python3-openmpi
@@ -175,7 +184,7 @@ This is the BOUT++ library python3 with openmpi.
 %package -n python2-%{name}-openmpi
 Summary:  BOUT++ mpich library for python2
 
-Requires: %{name}-mpich
+Requires: %{name}-openmpi
 Requires: python2
 Requires: openmpi
 Requires: python2-openmpi

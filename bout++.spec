@@ -148,6 +148,8 @@ This package contains the common files.
 %prep
 %setup -q -n BOUT-dev-%{version}
 
+%patch0 -p1
+
 autoreconf
 
 %build

@@ -21,6 +21,9 @@ case $name in
     bout++-nightly)
         version=$(git ls-remote https://github.com/dschwoerer/BOUT-dev.git|grep my_v4|cut -c 1-40)
         ;;
+    bout++-next)
+        version=$(git ls-remote https://github.com/boutproject/BOUT-dev.git|grep heads/next\$|cut -c 1-40)
+        ;;
     mangareader)
         version=$(git ls-remote https://github.com/dschwoerer/$name.git|grep master|cut -c 1-40)
         ;;
@@ -48,7 +51,7 @@ fi
 #git diff
 
 project=scripts
-if test $name == bout++-nightly || test $name == bout++
+if test $name = bout++-nightly || test $name = bout++ || test $name = bout++-next
 then
     project=bout
 fi

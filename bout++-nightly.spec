@@ -1,10 +1,10 @@
 %global git 1
-%global commit bbe2ab703ebc79f03843cd32543ab2cb3a605f3b
+%global commit f57d1904f325e73558c79b0dbcfda6a8f635c466
 %global shortcommit %(c=%{commit}; echo ${c:0:7})
 
 Name:           bout++-nightly
 Version:        4.1.2
-Release:        20180509git%{shortcommit}%{?dist}
+Release:        20180622git%{shortcommit}%{?dist}
 Summary:        Library for the BOUndary Turbulence simulation framework
 
 Group:          Applications/Engineering
@@ -280,13 +280,11 @@ do
     --includedir=%{_includedir}/$mpi-%{_arch} \
     --datarootdir=%{_libdir}/$mpi/share \
     --mandir=%{_libdir}/$mpi/share/man
-  make %{?_smp_mflags} shared
-  echo $LD_LIBRARY_PATH
-  export LD_LIBRARY_PATH=$(pwd)/lib
-  make %{?_smp_mflags} python
+  # workaround to prevent race condition
+  touch lib/.last.o.file
+  make %{?_smp_mflags} shared python
   make %{?_smp_mflags} python2
-  # Workaround for PR#982
-  make %{?_smp_mflags} -C manual doxygen
+  export LD_LIBRARY_PATH=$(pwd)/lib
   make %{?_smp_mflags} -C manual html man
   module purge
   popd
@@ -305,9 +303,9 @@ do
   echo "diff -Naur a/make.config b/make.config
 --- a/make.config       2017-05-02 23:03:57.298625399 +0100
 +++ b/make.config       2017-05-02 23:04:26.460489477 +0100
-@@ -16,7 +16,7 @@
- # PETSc config variables need to be first, else they may clobber other
- # options (e.g. CXX, CXXFLAGS)
+@@ -20,7 +20,7 @@
+ PETSC_DIR ?= 
+ PETSC_ARCH ?= 
  
 -
 +RELEASED                 = %{version}-%{release}
@@ -328,7 +326,7 @@ do
   module purge
 done
 
-# install bout libraries
+# install python libraries
 pushd tools/pylib
 for d in boutdata bout_runners boututils  post_bout zoidberg
 do
@@ -360,12 +358,11 @@ done
 # Fix python interpreter for libraries
 for f in $(find -L ${RPM_BUILD_ROOT}/%{python3_sitelib} -executable -type f)
 do
-    sed -i 's/#!\/usr\/bin\/env python/#!\/usr\/bin\/python3/' $f
+    sed -i 's|#!/usr/bin/env python3|#!/usr/bin/python3|' $f
 done
 for f in $(find -L ${RPM_BUILD_ROOT}/%{python2_sitelib} -executable -type f)
 do
-    sed -i 's/#!\/usr\/bin\/env python/#!\/usr\/bin\/python2/' $f
-    sed -i 's/#!\/usr\/bin\/python2/#!\/usr\/bin\/python2/' $f
+    sed -i 's|#!/usr/bin/env python3|#!/usr/bin/python2|' $f
 done
 
 %check
@@ -381,7 +378,6 @@ do
     export PYTHONPATH=${RPM_BUILD_ROOT}/%{python3_sitelib}:${RPM_BUILD_ROOT}/%{python3_sitearch}/${mpi}/
     alias python=python3
     export PYTHONIOENCODING=utf8
-    ./test_suite_make  || exit $fail
     ./test_suite       || exit $fail
     popd
     pushd build_$mpi/tests/MMS
@@ -465,6 +461,12 @@ done
 %license LICENSE.GPL
 
 %changelog
+* Fri Jun 22 2018 David Schwörer <schword2mail.dcu.ie> - 4.1.2-20180622gitf57d190
+- Update to version 4.1.2 - f57d190
+
+* Fri Jun 22 2018 David Schwörer <schword2mail.dcu.ie> - 4.1.2-20180622git3fc8930
+- Update to version 4.1.2 - 3fc8930
+
 * Wed May 09 2018 David Schwörer <schword2mail.dcu.ie> - 4.1.2-20180509gitbbe2ab7
 - Update to version 4.1.2 - bbe2ab7
 

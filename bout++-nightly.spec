@@ -1,5 +1,5 @@
 %global git 1
-%global commit f57d1904f325e73558c79b0dbcfda6a8f635c466
+%global commit e81eefd8f9011f2c5801ee49f5cacc97beb37b45
 %global shortcommit %(c=%{commit}; echo ${c:0:7})
 
 Name:           bout++-nightly
@@ -253,7 +253,6 @@ autoreconf
            --with-netcdf \\\
            --with-hdf5 \\\
            --enable-optimize=3 \\\
-           CXXFLAGS="-Wno-unknown-pragmas" \\\
            --enable-shared
 
 %{nil}
@@ -461,6 +460,9 @@ done
 %license LICENSE.GPL
 
 %changelog
+* Fri Jun 22 2018 David Schwörer <schword2mail.dcu.ie> - 4.1.2-20180622gite81eefd
+- Update to version 4.1.2 - e81eefd
+
 * Fri Jun 22 2018 David Schwörer <schword2mail.dcu.ie> - 4.1.2-20180622gitf57d190
 - Update to version 4.1.2 - f57d190
 

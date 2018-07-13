@@ -1,10 +1,10 @@
 %global git 1
-%global commit e81eefd8f9011f2c5801ee49f5cacc97beb37b45
+%global commit 4e9b53f262aaaf687a7d8acffe937e47d0cc3b9a
 %global shortcommit %(c=%{commit}; echo ${c:0:7})
 
 Name:           bout++-nightly
 Version:        4.1.2
-Release:        20180622git%{shortcommit}%{?dist}
+Release:        20180713git%{shortcommit}%{?dist}
 Summary:        Library for the BOUndary Turbulence simulation framework
 
 Group:          Applications/Engineering
@@ -302,12 +302,11 @@ do
   echo "diff -Naur a/make.config b/make.config
 --- a/make.config       2017-05-02 23:03:57.298625399 +0100
 +++ b/make.config       2017-05-02 23:04:26.460489477 +0100
-@@ -20,7 +20,7 @@
- PETSC_DIR ?= 
- PETSC_ARCH ?= 
+@@ -23,6 +23,7 @@
+ SLEPC_DIR ?= 
+ SLEPC_ARCH ?= 
  
--
-+RELEASED                 = %{version}-%{release}
++RELEASED                 = 4.1.2-20180713gitfa01cbd.fc28
  
  # These lines can be replaced in \"make install\" to point to install directories
  # They are used in the CXXFLAGS variable below rather than hard-coding the directories
@@ -460,6 +459,12 @@ done
 %license LICENSE.GPL
 
 %changelog
+* Fri Jul 13 2018 David Schwörer <schword2mail.dcu.ie> - 4.1.2-20180713git4e9b53f
+- Update to version 4.1.2 - 4e9b53f
+
+* Fri Jul 13 2018 David Schwörer <schword2mail.dcu.ie> - 4.1.2-20180713gitfa01cbd
+- Update to version 4.1.2 - fa01cbd
+
 * Fri Jun 22 2018 David Schwörer <schword2mail.dcu.ie> - 4.1.2-20180622gite81eefd
 - Update to version 4.1.2 - e81eefd
 

@@ -1,10 +1,10 @@
 %global git 1
-%global commit 8758e09334ef42f4aed8939d7fc59ec2206591be
+%global commit 9fa10c89b9378d2a79cb9a377a06cd798754205d
 %global shortcommit %(c=%{commit}; echo ${c:0:7})
 
 Name:           bout++-next
 Version:        4.1.2
-Release:        20180604git%{shortcommit}%{?dist}
+Release:        20180713git%{shortcommit}%{?dist}
 Summary:        Library for the BOUndary Turbulence simulation framework
 
 Group:          Applications/Engineering
@@ -311,11 +311,10 @@ do
   echo "diff -Naur a/make.config b/make.config
 --- a/make.config       2017-05-02 23:03:57.298625399 +0100
 +++ b/make.config       2017-05-02 23:04:26.460489477 +0100
-@@ -16,7 +16,7 @@
- # PETSc config variables need to be first, else they may clobber other
- # options (e.g. CXX, CXXFLAGS)
+@@ -23,6 +23,7 @@
+ SLEPC_DIR ?= 
+ SLEPC_ARCH ?= 
  
--
 +RELEASED                 = %{version}-%{release}
  
  # These lines can be replaced in \"make install\" to point to install directories
@@ -469,6 +468,9 @@ done
 %license LICENSE.GPL
 
 %changelog
+* Fri Jul 13 2018 David Schwörer <schword2mail.dcu.ie> - 4.1.2-20180713git9fa10c8
+- Update to version 4.1.2 - 9fa10c8
+
 * Mon Jun 04 2018 David Schwörer <schword2mail.dcu.ie> - 4.1.2-20180604git8758e09
 - Update to version 4.1.2 - 8758e09
 

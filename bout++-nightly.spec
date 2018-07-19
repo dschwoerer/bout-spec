@@ -1,10 +1,10 @@
 %global git 1
-%global commit 4e9b53f262aaaf687a7d8acffe937e47d0cc3b9a
+%global commit 4ec4d3091fb95d26e67a9d5d236a054464c60ee4
 %global shortcommit %(c=%{commit}; echo ${c:0:7})
 
 Name:           bout++-nightly
 Version:        4.1.2
-Release:        20180713git%{shortcommit}%{?dist}
+Release:        20180719git%{shortcommit}%{?dist}
 Summary:        Library for the BOUndary Turbulence simulation framework
 
 Group:          Applications/Engineering
@@ -306,7 +306,7 @@ do
  SLEPC_DIR ?= 
  SLEPC_ARCH ?= 
  
-+RELEASED                 = 4.1.2-20180713gitfa01cbd.fc28
++RELEASED                 = %{version}-%{release}
  
  # These lines can be replaced in \"make install\" to point to install directories
  # They are used in the CXXFLAGS variable below rather than hard-coding the directories
@@ -459,6 +459,15 @@ done
 %license LICENSE.GPL
 
 %changelog
+* Thu Jul 19 2018 David Schwörer <schword2mail.dcu.ie> - 4.1.2-20180719git4ec4d30
+- Update to version 4.1.2 - 4ec4d30
+
+* Thu Jul 19 2018 David Schwörer <schword2mail.dcu.ie> - 4.1.2-20180719git863517d
+- Update to version 4.1.2 - 863517d
+
+* Thu Jul 19 2018 David Schwörer <schword2mail.dcu.ie> - 4.1.2-20180719git87dd651
+- Update to version 4.1.2 - 87dd651
+
 * Fri Jul 13 2018 David Schwörer <schword2mail.dcu.ie> - 4.1.2-20180713git4e9b53f
 - Update to version 4.1.2 - 4e9b53f
 

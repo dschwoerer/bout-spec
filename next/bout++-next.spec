@@ -1,10 +1,10 @@
 %global git 1
-%global commit 9fa10c89b9378d2a79cb9a377a06cd798754205d
+%global commit c5c1a072b04919d87ff4abc5c8ddb5ca84540fd7
 %global shortcommit %(c=%{commit}; echo ${c:0:7})
 
 Name:           bout++-next
 Version:        4.1.2
-Release:        20180713git%{shortcommit}%{?dist}
+Release:        20180901git%{shortcommit}%{?dist}
 Summary:        Library for the BOUndary Turbulence simulation framework
 
 Group:          Applications/Engineering
@@ -18,6 +18,7 @@ Source0:        https://github.com/dschwoerer/BOUT-dev/archive/%{commit}/%{name}
 BuildRequires:  m4
 BuildRequires:  zlib-devel
 BuildRequires:  autoconf
+BuildRequires:  autoconf-archive
 BuildRequires:  automake
 BuildRequires:  environment-modules
 BuildRequires:  netcdf-devel
@@ -146,8 +147,8 @@ Requires: openmpi-devel
 Requires: netcdf-cxx4-devel
 Requires: hdf5-devel
 Requires: fftw-devel
-Requires: %{name}-openmpi = %{version}-%{release}
 Requires: make
+Requires: %{name}-openmpi = %{version}-%{release}
 
 %description openmpi-devel
 BOUT++ is a framework for writing fluid and plasma simulations in
@@ -157,7 +158,8 @@ BOUT++ is primarily designed and tested with reduced plasma fluid
 models in mind, but it can evolve any number of equations, with
 equations appearing in a readable form.
 
-This BOUT++ library is build for openmpi.
+This BOUT++ library is build for openmpi and provides the requred
+header files.
 
 %description openmpi
 BOUT++ is a framework for writing fluid and plasma simulations in
@@ -468,6 +470,9 @@ done
 %license LICENSE.GPL
 
 %changelog
+* Sat Sep 01 2018 David Schwörer <schword2mail.dcu.ie> - 4.1.2-20180901gitc5c1a07
+- Update to version 4.1.2 - c5c1a07
+
 * Fri Jul 13 2018 David Schwörer <schword2mail.dcu.ie> - 4.1.2-20180713git9fa10c8
 - Update to version 4.1.2 - 9fa10c8
 

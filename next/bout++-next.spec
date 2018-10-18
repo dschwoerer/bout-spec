@@ -6,12 +6,11 @@ Version:        4.1.2
 Release:        20180911git%{shortcommit}%{?dist}
 Summary:        Library for the BOUndary Turbulence simulation framework
 
-Group:          Applications/Engineering
-License:        LGPLv3
+License:        LGPLv3+
 URL:            https://boutproject.github.io/
-Source0:        https://github.com/dschwoerer/BOUT-dev/archive/%{commit}/%{name}-%{version}.tar.gz
+Source0:        https://github.com/boutproject/BOUT-dev/archive/%{commit}/%{name}-%{version}.tar.gz
 
-# Disable plotting PR 751
+# PR 1261
 Patch0:         legacy_install.patch
 
 
@@ -94,7 +93,7 @@ Summary: BOUT++ mpich libraries
 %package mpich-devel
 Summary: BOUT++ mpich libraries
 Requires: mpich-devel
-Requires: netcdf-cxx4-devel
+Requires: netcdf-cxx%{?fedora:4}-devel
 Requires: hdf5-devel
 Requires: fftw-devel
 Requires: %{name}-mpich = %{version}-%{release}
@@ -153,7 +152,7 @@ Summary: BOUT++ openmpi libraries
 %package openmpi-devel
 Summary: BOUT++ openmpi libraries
 Requires: openmpi-devel
-Requires: netcdf-cxx4-devel
+Requires: netcdf-cxx%{?fedora:4}-devel
 Requires: hdf5-devel
 Requires: fftw-devel
 Requires: make
@@ -220,7 +219,7 @@ BuildArch: noarch
 %{?python_provide:%python_provide python%{python3_pkgversion}-%{name}}
 
 %description -n python%{python3_pkgversion}-%{name}
-python%{python3_pkgversion} library for pre and post processing of BOUT++ data
+Python%{python3_pkgversion} library for pre and post processing of BOUT++ data
 
 
 %package -n python2-%{name}

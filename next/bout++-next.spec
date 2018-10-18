@@ -40,10 +40,6 @@ BuildRequires:  python%{python3_pkgversion}-numpy
 BuildRequires:  python%{python3_pkgversion}-Cython
 BuildRequires:  python%{python3_pkgversion}-netcdf4
 BuildRequires:  python%{python3_pkgversion}-scipy
-BuildRequires:  python2
-BuildRequires:  python2-numpy
-BuildRequires:  python2-netcdf4
-BuildRequires:  python2-Cython
 BuildRequires:  blas-devel
 BuildRequires:  lapack-devel
 BuildRequires:  gcc-c++
@@ -130,17 +126,6 @@ Requires: python%{python3_pkgversion}-numpy
 %description  -n python%{python3_pkgversion}-%{name}-mpich
 This is the BOUT++ library python%{python3_pkgversion} with mpich.
 
-%package -n python2-%{name}-mpich
-Summary:  BOUT++ mpich library for python2
-Requires: %{name}-mpich
-BuildRequires: python%{?fedora:2}-devel
-Requires: mpich
-Requires: python2-mpich
-Requires: python2-numpy
-%{?python_provide:%python_provide python2-%{name}-mpich}
-%description  -n python2-%{name}-mpich
-This is the BOUT++ library python2 with mpich.
-
 %endif
 
 
@@ -191,18 +176,6 @@ Requires: python%{python3_pkgversion}-numpy
 %description  -n python%{python3_pkgversion}-%{name}-openmpi
 This is the BOUT++ library python%{python3_pkgversion} with openmpi.
 
-%package -n python2-%{name}-openmpi
-Summary:  BOUT++ mpich library for python2
-
-Requires: %{name}-openmpi
-BuildRequires: python%{?fedora:2}-devel
-Requires: openmpi
-Requires: python2-openmpi
-Requires: python2-numpy
-%{?python_provide:%python_provide python2-%{name}-openmpi}
-%description  -n python2-%{name}-openmpi
-This is the BOUT++ library python2 with openmpi.
-
 
 %endif
 
@@ -222,19 +195,6 @@ BuildArch: noarch
 Python%{python3_pkgversion} library for pre and post processing of BOUT++ data
 
 
-%package -n python2-%{name}
-Summary: BOUT++ python library
-Requires: netcdf4-python
-Requires: %{name}-common
-Requires: python2-numpy
-%if 0%{?fedora}
-Suggests: python2-scipy
-%endif
-BuildArch: noarch
-%{?python_provide:%python_provide python2-%{name}}
-
-%description -n python2-%{name}
-Python2 library for pre and post processing of BOUT++ data.
 
 %if %{manual}
 %package -n %{name}-doc
@@ -307,7 +267,6 @@ do
   # workaround to prevent race condition
   touch lib/.last.o.file
   make %{?_smp_mflags} shared python
-  make %{?_smp_mflags} python2
   export LD_LIBRARY_PATH=$(pwd)/lib
   %if %{manual}
   make %{?_smp_mflags} -C manual html man
@@ -357,8 +316,6 @@ for d in boutdata bout_runners boututils  post_bout zoidberg
 do
     mkdir -p ${RPM_BUILD_ROOT}/%{python3_sitelib}/$d
     cp $d/*py ${RPM_BUILD_ROOT}/%{python3_sitelib}/$d/
-    mkdir -p ${RPM_BUILD_ROOT}/%{python2_sitelib}/$d
-    cp $d/*py ${RPM_BUILD_ROOT}/%{python2_sitelib}/$d/
 done
 popd
 %if %{manual}
@@ -377,18 +334,12 @@ for mpi in %{mpi_list}
 do
     mkdir -p ${RPM_BUILD_ROOT}/%{python3_sitearch}/${mpi}/
     install build_$mpi/tools/pylib/boutcore.*.so ${RPM_BUILD_ROOT}/%{python3_sitearch}/${mpi}/
-    mkdir -p ${RPM_BUILD_ROOT}/%{python2_sitearch}/${mpi}/
-    install build_$mpi/tools/pylib/boutcore.so ${RPM_BUILD_ROOT}/%{python2_sitearch}/${mpi}/
 done
 
 # Fix python interpreter for libraries
 for f in $(find -L ${RPM_BUILD_ROOT}/%{python3_sitelib} -executable -type f)
 do
     sed -i 's|#!/usr/bin/env python3|#!/usr/bin/python3|' $f
-done
-for f in $(find -L ${RPM_BUILD_ROOT}/%{python2_sitelib} -executable -type f)
-do
-    sed -i 's|#!/usr/bin/env python3|#!/usr/bin/python2|' $f
 done
 
 %check
@@ -443,8 +394,6 @@ done
 %{_libdir}/mpich/bin/*
 %files -n python%{python3_pkgversion}-%{name}-mpich
 %{python3_sitearch}/mpich/*
-%files -n python2-%{name}-mpich
-%{python2_sitearch}/mpich/*
 %endif
 
 %if %{with_openmpi}
@@ -465,17 +414,11 @@ done
 %{_libdir}/openmpi/bin/*
 %files -n python%{python3_pkgversion}-%{name}-openmpi
 %{python3_sitearch}/openmpi/*
-%files -n python2-%{name}-openmpi
-%{python2_sitearch}/openmpi/*
 %endif
 
 %files -n python%{python3_pkgversion}-%{name}
 %dir %{python3_sitelib}/*
 %{python3_sitelib}/*/*
-
-%files -n python2-%{name}
-%dir %{python2_sitelib}/*
-%{python2_sitelib}/*/*
 
 %if %{manual}
 %files -n %{name}-doc

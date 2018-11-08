@@ -344,7 +344,12 @@ done
 # Fix python interpreter for libraries
 for f in $(find -L ${RPM_BUILD_ROOT}/%{python3_sitelib} -executable -type f)
 do
+    sed -i 's|#!/usr/bin/env python|#!/usr/bin/python3|' $f
     sed -i 's|#!/usr/bin/env python3|#!/usr/bin/python3|' $f
+    sed -i 's|#!/usr/bin/python|#!/usr/bin/python3|' $f
+    # remove introduced but excessive 3's
+    sed -i 's|#!/usr/bin/python333|#!/usr/bin/python3|' $f
+    sed -i 's|#!/usr/bin/python33|#!/usr/bin/python3|' $f
 done
 
 %check
@@ -446,6 +451,7 @@ done
 * Wed Nov 07 2018 David Schwörer <schword2mail.dcu.ie> - 4.2.0-20181107gitf07014d
 - Update to version 4.2.0 - f07014d
 - Add language support
+- Fix mangling of shebangs
 
 * Tue Sep 11 2018 David Schwörer <schword2mail.dcu.ie> - 4.1.2-20180911git0899475
 - Update to version 4.1.2 - 0899475

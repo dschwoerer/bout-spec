@@ -1,9 +1,9 @@
-%global commit 089947521a6b8cbfdb109c4ca516b16a1cdbef04
+%global commit f07014d6c3d3924ec1f883a1f1864daa14a71ad7
 %global shortcommit %(c=%{commit}; echo ${c:0:7})
 
 Name:           bout++-next
-Version:        4.1.2
-Release:        20180911git%{shortcommit}%{?dist}
+Version:        4.2.0
+Release:        20181107git%{shortcommit}%{?dist}
 Summary:        Library for the BOUndary Turbulence simulation framework
 
 License:        LGPLv3+
@@ -11,7 +11,7 @@ URL:            https://boutproject.github.io/
 Source0:        https://github.com/boutproject/BOUT-dev/archive/%{commit}/%{name}-%{version}.tar.gz
 
 # PR 1261
-Patch0:         legacy_install.patch
+#Patch0:         legacy_install.patch
 
 
 %global test 1
@@ -28,6 +28,7 @@ BuildRequires:  m4
 BuildRequires:  zlib-devel
 BuildRequires:  autoconf
 BuildRequires:  autoconf-archive
+BuildRequires:  gettext-devel
 BuildRequires:  automake
 BuildRequires:  environment-modules
 BuildRequires:  netcdf-devel
@@ -86,6 +87,8 @@ equations appearing in a readable form.
 %package mpich
 Requires: %{name}-common
 Summary: BOUT++ mpich libraries
+# Use bundled version, to reproduce upstream results
+Provides: bundled(libpvode)
 %package mpich-devel
 Summary: BOUT++ mpich libraries
 Requires: mpich-devel
@@ -134,6 +137,8 @@ This is the BOUT++ library python%{python3_pkgversion} with mpich.
 %package openmpi
 Requires: %{name}-common
 Summary: BOUT++ openmpi libraries
+# Use bundled version, to reproduce upstream results
+Provides: bundled(libpvode)
 %package openmpi-devel
 Summary: BOUT++ openmpi libraries
 Requires: openmpi-devel
@@ -229,7 +234,7 @@ This package contains the common files.
 
 %prep
 %setup -q -n BOUT-dev-%{commit}
-%patch0 -p 1
+#%patch0 -p 1
 
 autoreconf
 
@@ -392,6 +397,7 @@ done
 %{_includedir}/mpich-%{_arch}/bout++/pvode/*.h
 %{_libdir}/mpich/lib/*.so
 %{_libdir}/mpich/bin/*
+%{_libdir}/mpich/share/locale/*/LC_MESSAGES/libbout.mo
 %files -n python%{python3_pkgversion}-%{name}-mpich
 %{python3_sitearch}/mpich/*
 %endif
@@ -412,6 +418,7 @@ done
 %{_includedir}/openmpi-%{_arch}/bout++/pvode/*.h
 %{_libdir}/openmpi/lib/*.so
 %{_libdir}/openmpi/bin/*
+%{_libdir}/openmpi/share/locale/*/LC_MESSAGES/libbout.mo
 %files -n python%{python3_pkgversion}-%{name}-openmpi
 %{python3_sitearch}/openmpi/*
 %endif
@@ -428,12 +435,18 @@ done
 
 %files common
 %doc README.md
-%doc CITATION
+%doc CITATION.bib
+%doc CITATION.cff
 %doc CHANGELOG.md
+%doc CONTRIBUTING.md
 %license LICENSE
 %license LICENSE.GPL
 
 %changelog
+* Wed Nov 07 2018 David Schwörer <schword2mail.dcu.ie> - 4.2.0-20181107gitf07014d
+- Update to version 4.2.0 - f07014d
+- Add language support
+
 * Tue Sep 11 2018 David Schwörer <schword2mail.dcu.ie> - 4.1.2-20180911git0899475
 - Update to version 4.1.2 - 0899475
 

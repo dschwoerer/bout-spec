@@ -1,50 +1,56 @@
-%global git 1
-%global commit 4ec4d3091fb95d26e67a9d5d236a054464c60ee4
+%global commit c2fbfdc35d3d0bfe1272cc8c3e89c7ecdc7fe8f5
 %global shortcommit %(c=%{commit}; echo ${c:0:7})
 
 Name:           bout++-nightly
 Version:        4.1.2
-Release:        20180719git%{shortcommit}%{?dist}
+Release:        20181108git%{shortcommit}%{?dist}
 Summary:        Library for the BOUndary Turbulence simulation framework
 
-Group:          Applications/Engineering
-License:        LGPLv3
+License:        LGPLv3+
 URL:            https://boutproject.github.io/
 Source0:        https://github.com/dschwoerer/BOUT-dev/archive/%{commit}/%{name}-%{version}.tar.gz
 
-# Disable plotting PR 751
-#Patch0:         fix.patch
+# PR 1261
+Patch0:          localedir.patch
+
+
+%global test 1
+%if 0%{?epel}
+%global test 0
+%endif
+
+%global manual 1
+%if 0%{?epel}
+%global manual 0
+%endif
 
 BuildRequires:  m4
 BuildRequires:  zlib-devel
 BuildRequires:  autoconf
+BuildRequires:  autoconf-archive
+BuildRequires:  gettext-devel
 BuildRequires:  automake
 BuildRequires:  environment-modules
 BuildRequires:  netcdf-devel
-BuildRequires:  netcdf-cxx4-devel
+BuildRequires:  netcdf-cxx%{?fedora:4}-devel
 BuildRequires:  hdf5-devel
 BuildRequires:  fftw-devel
 BuildRequires:  make
-BuildRequires:  python3
-BuildRequires:  python3-h5py
-BuildRequires:  python3-numpy
-BuildRequires:  python3-netcdf4
-BuildRequires:  python3-scipy
-BuildRequires:  python3-Cython
-BuildRequires:  python2
-BuildRequires:  python2-h5py
-BuildRequires:  python2-numpy
-BuildRequires:  python2-netcdf4
-BuildRequires:  python2-scipy
-BuildRequires:  python2-Cython
-BuildRequires:  python2-future
+BuildRequires:  python%{python3_pkgversion}
+BuildRequires:  python%{python3_pkgversion}-numpy
+BuildRequires:  python%{python3_pkgversion}-Cython
+BuildRequires:  python%{python3_pkgversion}-netcdf4
+BuildRequires:  python%{python3_pkgversion}-scipy
 BuildRequires:  blas-devel
 BuildRequires:  lapack-devel
 BuildRequires:  gcc-c++
 # cxx generation
-BuildRequires:  python3-jinja2
+BuildRequires:  python%{python3_pkgversion}-jinja2
 # Documentation
+%if %{manual}
+BuildRequires:  doxygen
 BuildRequires:  python3-sphinx
+%endif
 
 %global with_mpich 1
 %global with_openmpi 1
@@ -58,10 +64,6 @@ BuildRequires:  python3-sphinx
 # No openmpi on s390(x)
 %global with_openmpi 0
 %endif
-# openmpi is broken. Python run fails
-# Should be fixed in openmpi 3.0.x
-# https://github.com/open-mpi/ompi/issues/3705
-%global with_openmpi 0
 
 %if %{with_mpich}
 BuildRequires:  mpich-devel
@@ -85,10 +87,12 @@ equations appearing in a readable form.
 %package mpich
 Requires: %{name}-common
 Summary: BOUT++ mpich libraries
+# Use bundled version, to reproduce upstream results
+Provides: bundled(libpvode)
 %package mpich-devel
 Summary: BOUT++ mpich libraries
 Requires: mpich-devel
-Requires: netcdf-cxx4-devel
+Requires: netcdf-cxx%{?fedora:4}-devel
 Requires: hdf5-devel
 Requires: fftw-devel
 Requires: %{name}-mpich = %{version}-%{release}
@@ -114,43 +118,48 @@ equations appearing in a readable form.
 
 This BOUT++ library is build for mpich.
 
-%package -n python3-%{name}-mpich
-Summary:  BOUT++ mpich library for python3
-Requires: %{name}-common
-Requires: python3
-Requires: mpich
-Requires: python3-mpich
-Requires: python3-numpy
-%{?python_provide:%python_provide python3-%{name}-mpich}
-%description  -n python3-%{name}-mpich
-This is the BOUT++ library python3 with mpich.
-
-%package -n python2-%{name}-mpich
-Summary:  BOUT++ mpich library for python2
+%package -n python%{python3_pkgversion}-%{name}-mpich
+Summary:  BOUT++ mpich library for python%{python3_pkgversion}
 Requires: %{name}-mpich
-Requires: python2
+BuildRequires: python%{python3_pkgversion}-devel
 Requires: mpich
-Requires: python2-mpich
-Requires: python2-numpy
-%{?python_provide:%python_provide python2-%{name}-mpich}
-%description  -n python2-%{name}-mpich
-This is the BOUT++ library python2 with mpich.
+Requires: python%{python3_pkgversion}-mpich
+Requires: python%{python3_pkgversion}-numpy
+%{?python_provide:%python_provide python%{python3_pkgversion}-%{name}-mpich}
+%description  -n python%{python3_pkgversion}-%{name}-mpich
+This is the BOUT++ library python%{python3_pkgversion} with mpich.
 
 %endif
 
 
 %if %{with_openmpi}
+
+%package openmpi
+Requires: %{name}-common
+Summary: BOUT++ openmpi libraries
+# Use bundled version, to reproduce upstream results
+Provides: bundled(libpvode)
 %package openmpi-devel
 Summary: BOUT++ openmpi libraries
 Requires: openmpi-devel
-Requires: netcdf-devel
+Requires: netcdf-cxx%{?fedora:4}-devel
 Requires: hdf5-devel
 Requires: fftw-devel
 Requires: make
-Requires: %{name}-common
-Provides: %{name}-openmpi = %{version}-%{release}
-Provides: %{name}-openmpi-static = %{version}-%{release}
+Requires: %{name}-openmpi = %{version}-%{release}
+
 %description openmpi-devel
+BOUT++ is a framework for writing fluid and plasma simulations in
+curvilinear geometry. It is intended to be quite modular, with a
+variety of numerical methods and time-integration solvers available.
+BOUT++ is primarily designed and tested with reduced plasma fluid
+models in mind, but it can evolve any number of equations, with
+equations appearing in a readable form.
+
+This BOUT++ library is build for openmpi and provides the requred
+header files.
+
+%description openmpi
 BOUT++ is a framework for writing fluid and plasma simulations in
 curvilinear geometry. It is intended to be quite modular, with a
 variety of numerical methods and time-integration solvers available.
@@ -160,59 +169,39 @@ equations appearing in a readable form.
 
 This BOUT++ library is build for openmpi.
 
-%package -n python3-%{name}-openmpi
-Summary:  BOUT++ mpich library for python3
-Requires: %{name}-common
-Requires: python3
+%package -n python%{python3_pkgversion}-%{name}-openmpi
+Summary:  BOUT++ mpich library for python%{python3_pkgversion}
+Requires: %{name}-openmpi
+BuildRequires: python%{python3_pkgversion}-devel
 Requires: openmpi
-Requires: python3-openmpi
-Requires: python3-numpy
-%{?python_provide:%python_provide python3-%{name}-openmpi}
+Requires: python%{python3_pkgversion}-openmpi
+Requires: python%{python3_pkgversion}-numpy
+%{?python_provide:%python_provide python%{python3_pkgversion}-%{name}-openmpi}
 
-%description  -n python3-%{name}-openmpi
-This is the BOUT++ library python3 with openmpi.
-
-%package -n python2-%{name}-openmpi
-Summary:  BOUT++ mpich library for python2
-
-Requires: %{name}-mpich
-Requires: python2
-Requires: openmpi
-Requires: python2-openmpi
-Requires: python2-numpy
-%{?python_provide:%python_provide python2-%{name}-openmpi}
-%description  -n python2-%{name}-openmpi
-This is the BOUT++ library python2 with openmpi.
+%description  -n python%{python3_pkgversion}-%{name}-openmpi
+This is the BOUT++ library python%{python3_pkgversion} with openmpi.
 
 
 %endif
 
 
-%package -n python3-%{name}
+%package -n python%{python3_pkgversion}-%{name}
 Summary: BOUT++ python library
-Requires: netcdf4-python3
+Requires: netcdf4-python%{python3_pkgversion}
 Requires: %{name}-common
-Requires: python3-numpy
-Suggests: python3-scipy
+Requires: python%{python3_pkgversion}-numpy
+%if 0%{?fedora}
+Suggests: python%{python3_pkgversion}-scipy
+%endif
 BuildArch: noarch
-%{?python_provide:%python_provide python3-%{name}}
+%{?python_provide:%python_provide python%{python3_pkgversion}-%{name}}
 
-%description -n python3-%{name}
-Python3 library for pre and post processing of BOUT++ data
+%description -n python%{python3_pkgversion}-%{name}
+Python%{python3_pkgversion} library for pre and post processing of BOUT++ data
 
 
-%package -n python2-%{name}
-Summary: BOUT++ python library
-Requires: netcdf4-python
-Requires: %{name}-common
-Requires: python2-numpy
-Suggests: python2-scipy
-BuildArch: noarch
-%{?python_provide:%python_provide python2-%{name}}
 
-%description -n python2-%{name}
-Python2 library for pre and post processing of BOUT++ data.
-
+%if %{manual}
 %package -n %{name}-doc
 Summary: BOUT++ Documentation
 Requires: %{name}-common
@@ -227,7 +216,7 @@ models in mind, but it can evolve any number of equations, with
 equations appearing in a readable form.
 
 This package contains the documentation.
-
+%endif
 
 %package common
 Summary: BOUT++ python library
@@ -245,6 +234,7 @@ This package contains the common files.
 
 %prep
 %setup -q -n BOUT-dev-%{commit}
+%patch0 -p 1
 
 autoreconf
 
@@ -282,9 +272,10 @@ do
   # workaround to prevent race condition
   touch lib/.last.o.file
   make %{?_smp_mflags} shared python
-  make %{?_smp_mflags} python2
   export LD_LIBRARY_PATH=$(pwd)/lib
+  %if %{manual}
   make %{?_smp_mflags} -C manual html man
+  %endif
   module purge
   popd
 done
@@ -330,10 +321,9 @@ for d in boutdata bout_runners boututils  post_bout zoidberg
 do
     mkdir -p ${RPM_BUILD_ROOT}/%{python3_sitelib}/$d
     cp $d/*py ${RPM_BUILD_ROOT}/%{python3_sitelib}/$d/
-    mkdir -p ${RPM_BUILD_ROOT}/%{python2_sitelib}/$d
-    cp $d/*py ${RPM_BUILD_ROOT}/%{python2_sitelib}/$d/
 done
 popd
+%if %{manual}
 mandir=$(ls build_*/manual -d|head -n1)
 mkdir -p ${RPM_BUILD_ROOT}/%{_mandir}/man1/
 install -m 644 $mandir/man/bout.1 ${RPM_BUILD_ROOT}/%{_mandir}/man1/bout++.1
@@ -342,29 +332,29 @@ rm -rf $mandir/html/.buildinfo
 rm -rf $mandir/html/.doctrees
 rm -rf $mandir/html/_sources
 cp -r $mandir/html ${RPM_BUILD_ROOT}/%{_defaultdocdir}/bout++/
-
+%endif
 
 # install boutcore library
 for mpi in %{mpi_list}
 do
     mkdir -p ${RPM_BUILD_ROOT}/%{python3_sitearch}/${mpi}/
     install build_$mpi/tools/pylib/boutcore.*.so ${RPM_BUILD_ROOT}/%{python3_sitearch}/${mpi}/
-    mkdir -p ${RPM_BUILD_ROOT}/%{python2_sitearch}/${mpi}/
-    install build_$mpi/tools/pylib/boutcore.so ${RPM_BUILD_ROOT}/%{python2_sitearch}/${mpi}/
 done
 
 # Fix python interpreter for libraries
 for f in $(find -L ${RPM_BUILD_ROOT}/%{python3_sitelib} -executable -type f)
 do
+    sed -i 's|#!/usr/bin/env python|#!/usr/bin/python3|' $f
     sed -i 's|#!/usr/bin/env python3|#!/usr/bin/python3|' $f
-done
-for f in $(find -L ${RPM_BUILD_ROOT}/%{python2_sitelib} -executable -type f)
-do
-    sed -i 's|#!/usr/bin/env python3|#!/usr/bin/python2|' $f
+    sed -i 's|#!/usr/bin/python|#!/usr/bin/python3|' $f
+    # remove introduced but excessive 3's
+    sed -i 's|#!/usr/bin/python333|#!/usr/bin/python3|' $f
+    sed -i 's|#!/usr/bin/python33|#!/usr/bin/python3|' $f
 done
 
 %check
 # Set to 1 to fail if tests fail
+%if %{test}
 fail=1
 for mpi in %{mpi_list}
 do
@@ -384,6 +374,7 @@ do
     popd
     module purge
 done
+%endif
 
 for f in $(find -L ${RPM_BUILD_ROOT}/%{python3_sitelib}/*/*\.py{c,o} -type f)
 do
@@ -411,10 +402,9 @@ done
 %{_includedir}/mpich-%{_arch}/bout++/pvode/*.h
 %{_libdir}/mpich/lib/*.so
 %{_libdir}/mpich/bin/*
-%files -n python3-%{name}-mpich
+%{_libdir}/mpich/share/locale/*/LC_MESSAGES/libbout.mo
+%files -n python%{python3_pkgversion}-%{name}-mpich
 %{python3_sitearch}/mpich/*
-%files -n python2-%{name}-mpich
-%{python2_sitearch}/mpich/*
 %endif
 
 %if %{with_openmpi}
@@ -433,32 +423,39 @@ done
 %{_includedir}/openmpi-%{_arch}/bout++/pvode/*.h
 %{_libdir}/openmpi/lib/*.so
 %{_libdir}/openmpi/bin/*
-%files -n python3-%{name}-openmpi
+%{_libdir}/openmpi/share/locale/*/LC_MESSAGES/libbout.mo
+%files -n python%{python3_pkgversion}-%{name}-openmpi
 %{python3_sitearch}/openmpi/*
-%files -n python2-%{name}-openmpi
-%{python2_sitearch}/openmpi/*
 %endif
 
-%files -n python3-%{name}
+%files -n python%{python3_pkgversion}-%{name}
 %dir %{python3_sitelib}/*
 %{python3_sitelib}/*/*
 
-%files -n python2-%{name}
-%dir %{python2_sitelib}/*
-%{python2_sitelib}/*/*
-
+%if %{manual}
 %files -n %{name}-doc
 %doc %{_mandir}/man1/bout++*
 %doc  %{_defaultdocdir}/bout++/
+%endif
 
 %files common
 %doc README.md
-%doc CITATION
+%doc CITATION.bib
+%doc CITATION.cff
 %doc CHANGELOG.md
+%doc CONTRIBUTING.md
 %license LICENSE
 %license LICENSE.GPL
 
 %changelog
+* Thu Nov 08 2018 David Schwörer <schword2mail.dcu.ie> - 4.1.2-20181108gitc2fbfdc
+- Update to version 4.1.2 - c2fbfdc
+- Add language support
+- Fix mangling of shebangs
+
+* Wed Sep 12 2018 David Schwörer <schword2mail.dcu.ie> - 4.1.2-20180719git4ec4d30
+- Fixes for epel
+
 * Thu Jul 19 2018 David Schwörer <schword2mail.dcu.ie> - 4.1.2-20180719git4ec4d30
 - Update to version 4.1.2 - 4ec4d30
 

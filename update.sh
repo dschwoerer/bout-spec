@@ -1,4 +1,5 @@
 # name of the spec file
+set -x
 name=$(ls *spec)
 if test $(echo $name|wc -w) -gt 1
 then
@@ -25,8 +26,12 @@ case $name in
         version=$(git ls-remote https://github.com/boutproject/BOUT-dev.git|grep heads/next\$|cut -c 1-40)
         ;;
     mangareader)
-        version=$(git ls-remote https://github.com/dschwoerer/$name.git|grep master|cut -c 1-40)
+        version=$(git ls-remote https://gitlab.com/dschwoerer/$name.git|grep master|cut -c 1-40)
         ;;
+    bout++)
+	echo "WARNING: Manual version change required"
+	version=
+	;;
     *)
         echo "Cannot resolve upstream version - aborting"
         exit 2
@@ -36,7 +41,7 @@ esac
 echo $version
 
 short=${version:0:7}
-if ! grep $version $name.spec &>/dev/null && grep "$vm" $name.spec|grep "Version:" &>/dev/null
+if test $version && ! grep $version $name.spec &>/dev/null && grep "$vm" $name.spec|grep "Version:" &>/dev/null
 then
     old=$(grep "%global commit" $name.spec)
     sed "s/$old/%global commit $version/" $name.spec -i
@@ -62,10 +67,18 @@ set -e
 spectool -g $name.spec
 rpkg srpm
 
-fedpkg --release f$(uname -r|cut -f2 -dc|cut -d. -f1) --module-name $name  local
-fedpkg --release f27 --module-name $name  mockbuild
+if ! test .$SKIP = .YES
+then
+    fedpkg --release f$(uname -r|cut -f2 -dc|cut -d. -f1) --name $name  local
+    fedpkg --release f27 --module-name $name  mockbuild
+else
+    mv $name*.tar.gz ~/rpmbuild/SOURCES/
+    rpmbuild -bs $name.spec
+    mv ~/rpmbuild/SOURCES/$name*.tar.gz .
+    mv $(ls -t ~/rpmbuild/SRPMS/$name* |head -n 1) .
+fi
 
-git commit -pm "Update $name to version $vm - $short"
+git commit -pm "Update $name to version $vm - $short" || :
 
-copr-cli build $project $(ls -t $name*src.rpm|head -n 1)
+copr-cli build $project $(ls -t $name*src.rpm|head -n 1) -r f30
 

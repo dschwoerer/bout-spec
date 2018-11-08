@@ -12,6 +12,7 @@ Source0:        https://github.com/boutproject/BOUT-dev/archive/%{commit}/%{name
 
 # PR 1261
 #Patch0:         legacy_install.patch
+Patch0:          localedir.patch
 
 
 %global test 1
@@ -234,7 +235,7 @@ This package contains the common files.
 
 %prep
 %setup -q -n BOUT-dev-%{commit}
-#%patch0 -p 1
+%patch0 -p 1
 
 autoreconf
 

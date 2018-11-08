@@ -25,6 +25,7 @@ BuildRequires:  m4
 BuildRequires:  zlib-devel
 BuildRequires:  autoconf
 BuildRequires:  autoconf-archive
+BuildRequires:  gettext-devel
 BuildRequires:  automake
 BuildRequires:  environment-modules
 BuildRequires:  netcdf-devel
@@ -83,6 +84,8 @@ equations appearing in a readable form.
 %package mpich
 Requires: %{name}-common
 Summary: BOUT++ mpich libraries
+# Use bundled version, to reproduce upstream results
+Provides: bundled(libpvode)
 %package mpich-devel
 Summary: BOUT++ mpich libraries
 Requires: mpich-devel
@@ -131,6 +134,8 @@ This is the BOUT++ library python%{python3_pkgversion} with mpich.
 %package openmpi
 Requires: %{name}-common
 Summary: BOUT++ openmpi libraries
+# Use bundled version, to reproduce upstream results
+Provides: bundled(libpvode)
 %package openmpi-devel
 Summary: BOUT++ openmpi libraries
 Requires: openmpi-devel
@@ -336,7 +341,12 @@ done
 # Fix python interpreter for libraries
 for f in $(find -L ${RPM_BUILD_ROOT}/%{python3_sitelib} -executable -type f)
 do
+    sed -i 's|#!/usr/bin/env python|#!/usr/bin/python3|' $f
     sed -i 's|#!/usr/bin/env python3|#!/usr/bin/python3|' $f
+    sed -i 's|#!/usr/bin/python|#!/usr/bin/python3|' $f
+    # remove introduced but excessive 3's
+    sed -i 's|#!/usr/bin/python333|#!/usr/bin/python3|' $f
+    sed -i 's|#!/usr/bin/python33|#!/usr/bin/python3|' $f
 done
 
 %check
@@ -425,9 +435,10 @@ done
 
 %files common
 %doc README.md
-%doc CITATION.cff
 %doc CITATION.bib
+%doc CITATION.cff
 %doc CHANGELOG.md
+%doc CONTRIBUTING.md
 %license LICENSE
 %license LICENSE.GPL
 
@@ -436,6 +447,7 @@ done
 - Update to 4.2.0
 - Remove python2 support
 - Add boutcore support
+- Fix mangling of shebangs
 
 * Tue Dec 12 2017 David Schwörer <schword2mail.dcu.ie> - 4.1.2-2
 - Add missing python_provide macro

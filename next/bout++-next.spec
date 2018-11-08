@@ -10,9 +10,8 @@ License:        LGPLv3+
 URL:            https://boutproject.github.io/
 Source0:        https://github.com/boutproject/BOUT-dev/archive/%{commit}/%{name}-%{version}.tar.gz
 
-# PR 1261
-#Patch0:         legacy_install.patch
-Patch0:          localedir.patch
+# PR 1362
+Patch0:         clean_squash.patch
 
 
 %global test 1

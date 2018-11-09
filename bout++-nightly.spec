@@ -250,6 +250,7 @@ autoreconf
 # MPI builds
 export CC=mpicc
 export CXX=mpicxx
+export PYTHONIOENCODING=utf8
 
 for mpi in %{mpi_list}
 do
@@ -353,23 +354,20 @@ do
 done
 
 %check
-# Set to 1 to fail if tests fail
 %if %{test}
-fail=1
 for mpi in %{mpi_list}
 do
+    export PYTHONIOENCODING=utf8
     module purge
     module load mpi/$mpi-%{_arch}
     pushd build_$mpi/tests/integrated
     LD_LIBRARY_PATH_=$LD_LIBRARY_PATH
     export LD_LIBRARY_PATH=${RPM_BUILD_ROOT}/%{_libdir}/${mpi}/lib/:$LD_LIBRARY_PATH
     export PYTHONPATH=${RPM_BUILD_ROOT}/%{python3_sitelib}:${RPM_BUILD_ROOT}/%{python3_sitearch}/${mpi}/
-    alias python=python3
-    export PYTHONIOENCODING=utf8
-    ./test_suite       || exit $fail
+    ./test_suite
     popd
     pushd build_$mpi/tests/MMS
-    ./test_suite       || exit $fail
+    ./test_suite
     export LD_LIBRARY_PATH=$LD_LIBRARY_PATH_
     popd
     module purge

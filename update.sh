@@ -80,5 +80,5 @@ fi
 
 git commit -pm "Update $name to version $vm - $short" || :
 
-copr-cli build $project $(ls -t $name*src.rpm|head -n 1) -r f30
+copr-cli build $project $(ls -t $name*src.rpm|head -n 1)
 

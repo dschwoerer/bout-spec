@@ -1,6 +1,6 @@
 Name:           bout++
 Version:        4.2.0
-Release:        2%{?dist}
+Release:        3%{?dist}
 Summary:        Library for the BOUndary Turbulence simulation framework
 
 License:        LGPLv3+
@@ -446,6 +446,9 @@ done
 %license LICENSE.GPL
 
 %changelog
+* Tue Dec 04 2018 David Schwörer <schword2mail.dcu.ie> - 4.2.0-3
+- Fix recommend
+
 * Thu Oct 18 2018 David Schwörer <schword2mail.dcu.ie> - 4.2.0-2
 - Update to 4.2.0
 - Remove python2 support

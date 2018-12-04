@@ -121,6 +121,7 @@ This BOUT++ library is build for mpich.
 %package -n python%{python3_pkgversion}-%{name}-mpich
 Summary:  BOUT++ mpich library for python%{python3_pkgversion}
 Requires: %{name}-mpich
+Requires: python%{python3_pkgversion}-%{name}
 BuildRequires: python%{python3_pkgversion}-devel
 Requires: mpich
 Requires: python%{python3_pkgversion}-mpich
@@ -172,6 +173,7 @@ This BOUT++ library is build for openmpi.
 %package -n python%{python3_pkgversion}-%{name}-openmpi
 Summary:  BOUT++ mpich library for python%{python3_pkgversion}
 Requires: %{name}-openmpi
+Requires: python%{python3_pkgversion}-%{name}
 BuildRequires: python%{python3_pkgversion}-devel
 Requires: openmpi
 Requires: python%{python3_pkgversion}-openmpi
@@ -191,7 +193,8 @@ Requires: netcdf4-python%{python3_pkgversion}
 Requires: %{name}-common
 Requires: python%{python3_pkgversion}-numpy
 %if 0%{?fedora}
-Suggests: python%{python3_pkgversion}-scipy
+Recommends: python%{python3_pkgversion}-scipy
+Recommends: python%{python3_pkgversion}-matplotlib
 %endif
 BuildArch: noarch
 %{?python_provide:%python_provide python%{python3_pkgversion}-%{name}}

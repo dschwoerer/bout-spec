@@ -7,8 +7,8 @@ License:        LGPLv3+
 URL:            https://boutproject.github.io/
 Source0:        https://github.com/boutproject/BOUT-dev/archive/v%{version}/%{name}-%{version}.tar.gz
 
-# PR 785
-#Patch0: tests-verbose-on-fail.patch
+# PR 1362
+Patch0:         clean_squash.patch
 
 
 %global test 1
@@ -154,7 +154,7 @@ BOUT++ is primarily designed and tested with reduced plasma fluid
 models in mind, but it can evolve any number of equations, with
 equations appearing in a readable form.
 
-This BOUT++ library is build for openmpi and provides the requred
+This BOUT++ library is build for openmpi and provides the required
 header files.
 
 %description openmpi
@@ -234,8 +234,7 @@ This package contains the common files.
 
 %prep
 %setup -q -n BOUT-dev-%{version}
-
-#%patch0 -p1
+%patch0 -p 1
 
 autoreconf
 

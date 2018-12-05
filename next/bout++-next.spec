@@ -1,9 +1,9 @@
-%global commit f07014d6c3d3924ec1f883a1f1864daa14a71ad7
+%global commit a4f453c1feeaee7b1e1f0d5dfe662403c1849757
 %global shortcommit %(c=%{commit}; echo ${c:0:7})
 
 Name:           bout++-next
 Version:        4.2.0
-Release:        20181107git%{shortcommit}%{?dist}
+Release:        20181204git%{shortcommit}%{?dist}
 Summary:        Library for the BOUndary Turbulence simulation framework
 
 License:        LGPLv3+
@@ -11,7 +11,7 @@ URL:            https://boutproject.github.io/
 Source0:        https://github.com/boutproject/BOUT-dev/archive/%{commit}/%{name}-%{version}.tar.gz
 
 # PR 1362
-Patch0:         clean_squash.patch
+#Patch0:         clean_squash.patch
 
 
 %global test 1
@@ -157,7 +157,7 @@ BOUT++ is primarily designed and tested with reduced plasma fluid
 models in mind, but it can evolve any number of equations, with
 equations appearing in a readable form.
 
-This BOUT++ library is build for openmpi and provides the requred
+This BOUT++ library is build for openmpi and provides the required
 header files.
 
 %description openmpi
@@ -237,7 +237,7 @@ This package contains the common files.
 
 %prep
 %setup -q -n BOUT-dev-%{commit}
-%patch0 -p 1
+#%patch0 -p 1
 
 autoreconf
 
@@ -451,6 +451,9 @@ done
 %license LICENSE.GPL
 
 %changelog
+* Tue Dec 04 2018 David Schwörer <schword2mail.dcu.ie> - 4.2.0-20181204gita4f453c
+- Update to version 4.2.0 - a4f453c
+
 * Wed Nov 07 2018 David Schwörer <schword2mail.dcu.ie> - 4.2.0-20181107gitf07014d
 - Update to version 4.2.0 - f07014d
 - Add language support

@@ -8,8 +8,9 @@ License:        GPLv3+
 URL:            https://boutproject.github.io/
 Source0:        https://github.com/boutproject/BOUT-dev/releases/download/v%{version}/BOUT++-v%{version}.tar.gz
 
-# PR 1362
+# PR 1560 and 1580
 Patch0:         fix-1560.patch
+Patch1:         fix-1580.patch
 
 
 %global test 1
@@ -236,6 +237,7 @@ This package contains the common files.
 %prep
 %setup -q -n BOUT++-v%{version}
 %patch0 -p 1
+%patch1 -p 1
 
 autoreconf
 
@@ -438,6 +440,12 @@ done
 %license LICENSE.GPL
 
 %changelog
+* Thu Feb 07 2019 David Schwörer <schword2mail.dcu.ie> - 4.2.1-0
+- Fix license
+- Bump to 4.2.1
+- Use new release
+- Release contains gtest, so we can run make check
+
 * Tue Dec 04 2018 David Schwörer <schword2mail.dcu.ie> - 4.2.0-3
 - Fix recommend
 

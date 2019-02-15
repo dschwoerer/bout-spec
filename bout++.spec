@@ -1,14 +1,15 @@
 Name:           bout++
-Version:        4.2.0
-Release:        3%{?dist}
+Version:        4.2.1
+Release:        0%{?dist}
 Summary:        Library for the BOUndary Turbulence simulation framework
 
-License:        LGPLv3+
+# BOUT++ itself is LGPL, but we are linking with GPLed code, so the distributed library is GPL
+License:        GPLv3+
 URL:            https://boutproject.github.io/
-Source0:        https://github.com/boutproject/BOUT-dev/archive/v%{version}/%{name}-%{version}.tar.gz
+Source0:        https://github.com/boutproject/BOUT-dev/releases/download/v%{version}/BOUT++-v%{version}.tar.gz
 
 # PR 1362
-Patch0:         clean_squash.patch
+Patch0:         fix-1560.patch
 
 
 %global test 1
@@ -233,7 +234,7 @@ equations appearing in a readable form.
 This package contains the common files.
 
 %prep
-%setup -q -n BOUT-dev-%{version}
+%setup -q -n BOUT++-v%{version}
 %patch0 -p 1
 
 autoreconf
@@ -273,7 +274,7 @@ do
   make %{?_smp_mflags} shared python
   export LD_LIBRARY_PATH=$(pwd)/lib
   %if %{manual}
-  make %{?_smp_mflags} -C manual html man
+  make -C manual html man
   %endif
   module purge
   popd
@@ -359,17 +360,9 @@ for mpi in %{mpi_list}
 do
     module purge
     module load mpi/$mpi-%{_arch}
-    pushd build_$mpi/tests/integrated
-    LD_LIBRARY_PATH_=$LD_LIBRARY_PATH
-    export LD_LIBRARY_PATH=${RPM_BUILD_ROOT}/%{_libdir}/${mpi}/lib/:$LD_LIBRARY_PATH
-    export PYTHONPATH=${RPM_BUILD_ROOT}/%{python3_sitelib}:${RPM_BUILD_ROOT}/%{python3_sitearch}/${mpi}/
-    alias python=python3
-    export PYTHONIOENCODING=utf8
-    ./test_suite       || exit $fail
-    popd
-    pushd build_$mpi/tests/MMS
-    ./test_suite       || exit $fail
-    export LD_LIBRARY_PATH=$LD_LIBRARY_PATH_
+    pushd build_$mpi
+    make %{?_smp_mflags} build-check
+    make check
     popd
     module purge
 done

@@ -171,7 +171,7 @@ equations appearing in a readable form.
 This BOUT++ library is build for openmpi.
 
 %package -n python%{python3_pkgversion}-%{name}-openmpi
-Summary:  BOUT++ mpich library for python%{python3_pkgversion}
+Summary:  BOUT++ openmpi library for python%{python3_pkgversion}
 Requires: %{name}-openmpi
 Requires: python%{python3_pkgversion}-%{name}
 BuildRequires: python%{python3_pkgversion}-devel

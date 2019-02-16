@@ -355,16 +355,17 @@ do
 done
 
 %check
-# Set to 1 to fail if tests fail
+
 %if %{test}
-fail=1
 for mpi in %{mpi_list}
 do
     module purge
     module load mpi/$mpi-%{_arch}
     pushd build_$mpi
+    test $mpi = openmpi && MPIRUN="mpirun -oversubscripe -np"
     make %{?_smp_mflags} build-check
     make check
+    MPIRUN=
     popd
     module purge
 done

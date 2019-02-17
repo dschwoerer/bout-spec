@@ -2,7 +2,7 @@
 %global shortcommit %(c=%{commit}; echo ${c:0:7})
 
 Name:           bout++-next
-Version:        4.2.0
+Version:        4.2.1
 Release:        20190217git%{shortcommit}%{?dist}
 Summary:        Library for the BOUndary Turbulence simulation framework
 
@@ -12,6 +12,8 @@ Source0:        https://github.com/boutproject/BOUT-dev/archive/%{commit}/%{name
 
 # PR 1585
 Patch0:         fix-1585.patch
+# debug try
+Patch1:         debug.patch
 
 %global test 1
 %if 0%{?epel}
@@ -237,6 +239,7 @@ This package contains the common files.
 %prep
 %setup -q -n BOUT-dev-%{commit}
 %patch0 -p 1
+%patch1 -p 1
 
 autoreconf
 
@@ -276,7 +279,7 @@ do
   make %{?_smp_mflags} shared python
   export LD_LIBRARY_PATH=$(pwd)/lib
   %if %{manual}
-  make %{?_smp_mflags} -C manual html man
+  make -C manual html man
   %endif
   module purge
   popd
@@ -367,10 +370,11 @@ do
     export PYTHONPATH=${RPM_BUILD_ROOT}/%{python3_sitelib}:${RPM_BUILD_ROOT}/%{python3_sitearch}/${mpi}/
     alias python=python3
     export PYTHONIOENCODING=utf8
-    ./test_suite       || exit $fail
+    export SEGFAULT_SIGNALS="abrt"
+    LD_PRELOAD=%{_libdir}/libSegFault.so ./test_suite       || exit $fail
     popd
     pushd build_$mpi/tests/MMS
-    ./test_suite       || exit $fail
+    LD_PRELOAD=%{_libdir}/libSegFault.so ./test_suite       || exit $fail
     export LD_LIBRARY_PATH=$LD_LIBRARY_PATH_
     popd
     module purge
@@ -449,8 +453,8 @@ done
 %license LICENSE.GPL
 
 %changelog
-* Sun Feb 17 2019 David Schwörer <schword2mail.dcu.ie> - 4.2.0-20190217git2fcddf5
-- Update to version 4.2.0 - 2fcddf5
+* Sun Feb 17 2019 David Schwörer <schword2mail.dcu.ie> - 4.2.1-20190217git2fcddf5
+- Update to version 4.2.1 - 2fcddf5
 
 * Wed Jan 02 2019 David Schwörer <schword2mail.dcu.ie> - 4.2.0-20190102git0b79a90
 - Update to version 4.2.0 - 0b79a90

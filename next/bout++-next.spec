@@ -1,18 +1,17 @@
-%global commit 0b79a901e28dba49e98f9e1ffad46ca14a171d5d
+%global commit 2fcddf55f2f63b63ec0d282c915d6177bef2e09e
 %global shortcommit %(c=%{commit}; echo ${c:0:7})
 
 Name:           bout++-next
 Version:        4.2.0
-Release:        20190102git%{shortcommit}%{?dist}
+Release:        20190217git%{shortcommit}%{?dist}
 Summary:        Library for the BOUndary Turbulence simulation framework
 
 License:        LGPLv3+
 URL:            https://boutproject.github.io/
 Source0:        https://github.com/boutproject/BOUT-dev/archive/%{commit}/%{name}-%{version}.tar.gz
 
-# PR 1362
-#Patch0:         clean_squash.patch
-
+# PR 1585
+Patch0:         fix-1585.patch
 
 %global test 1
 %if 0%{?epel}
@@ -237,7 +236,7 @@ This package contains the common files.
 
 %prep
 %setup -q -n BOUT-dev-%{commit}
-#%patch0 -p 1
+%patch0 -p 1
 
 autoreconf
 
@@ -356,9 +355,8 @@ do
 done
 
 %check
-# Set to 1 to fail if tests fail
+
 %if %{test}
-fail=1
 for mpi in %{mpi_list}
 do
     module purge
@@ -451,6 +449,9 @@ done
 %license LICENSE.GPL
 
 %changelog
+* Sun Feb 17 2019 David Schwörer <schword2mail.dcu.ie> - 4.2.0-20190217git2fcddf5
+- Update to version 4.2.0 - 2fcddf5
+
 * Wed Jan 02 2019 David Schwörer <schword2mail.dcu.ie> - 4.2.0-20190102git0b79a90
 - Update to version 4.2.0 - 0b79a90
 

@@ -364,6 +364,8 @@ for mpi in %{mpi_list}
 do
     module purge
     module load mpi/$mpi-%{_arch}
+    unset MPIRUN
+    test $mpi = openmpi && export MPIRUN="mpirun -oversubscribe -np"
     pushd build_$mpi/tests/integrated
     LD_LIBRARY_PATH_=$LD_LIBRARY_PATH
     export LD_LIBRARY_PATH=${RPM_BUILD_ROOT}/%{_libdir}/${mpi}/lib/:$LD_LIBRARY_PATH

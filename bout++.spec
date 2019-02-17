@@ -11,6 +11,7 @@ Source0:        https://github.com/boutproject/BOUT-dev/releases/download/v%{ver
 # PR 1560 and 1580
 Patch0:         fix-1560.patch
 Patch1:         fix-1580.patch
+Patch2:         fix-1585.patch
 
 
 %global test 1
@@ -238,6 +239,7 @@ This package contains the common files.
 %setup -q -n BOUT++-v%{version}
 %patch0 -p 1
 %patch1 -p 1
+%patch2 -p 1
 
 autoreconf
 
@@ -276,7 +278,7 @@ do
   make %{?_smp_mflags} shared python
   export LD_LIBRARY_PATH=$(pwd)/lib
   %if %{manual}
-  make -C manual html man
+  make %{?_smp_mflags} -C manual html man
   %endif
   module purge
   popd

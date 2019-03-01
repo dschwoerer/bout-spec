@@ -1,5 +1,5 @@
 Name:           bout++
-Version:        4.2.1
+Version:        4.2.2
 Release:        0%{?dist}
 Summary:        Library for the BOUndary Turbulence simulation framework
 
@@ -7,11 +7,6 @@ Summary:        Library for the BOUndary Turbulence simulation framework
 License:        GPLv3+
 URL:            https://boutproject.github.io/
 Source0:        https://github.com/boutproject/BOUT-dev/releases/download/v%{version}/BOUT++-v%{version}.tar.gz
-
-# PR 1560 and 1580
-Patch0:         fix-1560.patch
-Patch1:         fix-1580.patch
-Patch2:         fix-1585.patch
 
 
 %global test 1
@@ -237,9 +232,6 @@ This package contains the common files.
 
 %prep
 %setup -q -n BOUT++-v%{version}
-%patch0 -p 1
-%patch1 -p 1
-%patch2 -p 1
 
 autoreconf
 
@@ -273,8 +265,6 @@ do
     --includedir=%{_includedir}/$mpi-%{_arch} \
     --datarootdir=%{_libdir}/$mpi/share \
     --mandir=%{_libdir}/$mpi/share/man
-  # workaround to prevent race condition
-  touch lib/.last.o.file
   make %{?_smp_mflags} shared python
   export LD_LIBRARY_PATH=$(pwd)/lib
   %if %{manual}
@@ -443,6 +433,9 @@ done
 %license LICENSE.GPL
 
 %changelog
+* Fri Mar 01 2019 David Schwörer <schword2mail.dcu.ie> - 4.2.2-0
+- Update to version 4.2.2
+
 * Thu Feb 07 2019 David Schwörer <schword2mail.dcu.ie> - 4.2.1-0
 - Fix license
 - Bump to 4.2.1

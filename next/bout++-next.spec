@@ -1,19 +1,17 @@
-%global commit 2fcddf55f2f63b63ec0d282c915d6177bef2e09e
+%global commit f454d2548fabf63112c5b3a0e7937b3dc9f9ade4
 %global shortcommit %(c=%{commit}; echo ${c:0:7})
 
 Name:           bout++-next
-Version:        4.2.1
-Release:        20190217git%{shortcommit}%{?dist}
+Version:        4.2.2
+Release:        20190727git%{shortcommit}%{?dist}
 Summary:        Library for the BOUndary Turbulence simulation framework
 
 License:        LGPLv3+
 URL:            https://boutproject.github.io/
 Source0:        https://github.com/boutproject/BOUT-dev/archive/%{commit}/%{name}-%{version}.tar.gz
 
-# PR 1585
-Patch0:         fix-1585.patch
-# debug try
-Patch1:         debug.patch
+# Do not install mpark
+Patch0:         remove-mpark.patch
 
 %global test 1
 %if 0%{?epel}
@@ -45,6 +43,7 @@ BuildRequires:  python%{python3_pkgversion}-scipy
 BuildRequires:  blas-devel
 BuildRequires:  lapack-devel
 BuildRequires:  gcc-c++
+BuildRequires:  mpark-variant-devel
 # cxx generation
 BuildRequires:  python%{python3_pkgversion}-jinja2
 # Documentation
@@ -238,8 +237,9 @@ This package contains the common files.
 
 %prep
 %setup -q -n BOUT-dev-%{commit}
+# use the one provided by fedora
+rm -rf externalpackages/mpark.variant/
 %patch0 -p 1
-%patch1 -p 1
 
 autoreconf
 
@@ -274,8 +274,6 @@ do
     --includedir=%{_includedir}/$mpi-%{_arch} \
     --datarootdir=%{_libdir}/$mpi/share \
     --mandir=%{_libdir}/$mpi/share/man
-  # workaround to prevent race condition
-  touch lib/.last.o.file
   make %{?_smp_mflags} shared python
   export LD_LIBRARY_PATH=$(pwd)/lib
   %if %{manual}
@@ -455,6 +453,10 @@ done
 %license LICENSE.GPL
 
 %changelog
+* Sat Jul 27 2019 David Schwörer <schword2mail.dcu.ie> - 4.2.2-20190727gitf454d25
+- Update to version 4.2.2 - f454d25
+- remove bundled mpark
+
 * Sun Feb 17 2019 David Schwörer <schword2mail.dcu.ie> - 4.2.1-20190217git2fcddf5
 - Update to version 4.2.1 - 2fcddf5
 

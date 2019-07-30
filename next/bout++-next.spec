@@ -434,15 +434,9 @@ done
 %endif
 
 %files -n python%{python3_pkgversion}-%{name}
-%dir %{python3_sitelib}/boutdata
-%dir %{python3_sitelib}/bout_runners
-%dir %{python3_sitelib}/boututils
-%dir %{python3_sitelib}/post_bout
+%dir %{python3_sitelib}/*bout*
 %dir %{python3_sitelib}/zoidberg
-%{python3_sitelib}/boutdata/*
-%{python3_sitelib}/bout_runners/*
-%{python3_sitelib}/boututils/*
-%{python3_sitelib}/post_bout/*
+%{python3_sitelib}/*bout*/*
 %{python3_sitelib}/zoidberg/*
 
 %if %{manual}
@@ -464,7 +458,7 @@ done
 * Sat Jul 27 2019 David Schwörer <schword2mail.dcu.ie> - 4.2.2-20190727gitf454d25
 - Update to version 4.2.2 - f454d25
 - remove bundled mpark
-- explicitly list python sitelib packages for 32 bit arches
+- Ensure sitelib packages do not match arched mpi packages
 
 * Sun Feb 17 2019 David Schwörer <schword2mail.dcu.ie> - 4.2.1-20190217git2fcddf5
 - Update to version 4.2.1 - 2fcddf5

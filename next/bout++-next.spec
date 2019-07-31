@@ -10,6 +10,7 @@ License:        LGPLv3+
 URL:            https://boutproject.github.io/
 Source0:        https://github.com/boutproject/BOUT-dev/archive/%{commit}/%{name}-%{version}.tar.gz
 
+
 # Do not install mpark
 Patch0:         remove-mpark.patch
 
@@ -43,7 +44,9 @@ BuildRequires:  python%{python3_pkgversion}-scipy
 BuildRequires:  blas-devel
 BuildRequires:  lapack-devel
 BuildRequires:  gcc-c++
+%if 0%{?fedora}
 BuildRequires:  mpark-variant-devel
+%endif
 # cxx generation
 BuildRequires:  python%{python3_pkgversion}-jinja2
 # Documentation
@@ -237,9 +240,11 @@ This package contains the common files.
 
 %prep
 %setup -q -n BOUT-dev-%{commit}
-# use the one provided by fedora
+%if 0%{?fedora}
+# use mpark provided by fedora
 rm -rf externalpackages/mpark.variant/
 %patch0 -p 1
+%endif
 
 autoreconf
 
@@ -247,7 +252,6 @@ autoreconf
 %global configure_opts \\\
            --with-netcdf \\\
            --with-hdf5 \\\
-           --enable-optimize=3 \\\
            --enable-shared
 
 %{nil}
@@ -362,8 +366,7 @@ for mpi in %{mpi_list}
 do
     module purge
     module load mpi/$mpi-%{_arch}
-    unset MPIRUN
-    test $mpi = openmpi && export MPIRUN="mpirun -oversubscribe -np"
+    export OMPI_MCA_rmaps_base_oversubscribe=yes
     pushd build_$mpi/tests/integrated
     LD_LIBRARY_PATH_=$LD_LIBRARY_PATH
     export LD_LIBRARY_PATH=${RPM_BUILD_ROOT}/%{_libdir}/${mpi}/lib/:$LD_LIBRARY_PATH
@@ -457,7 +460,7 @@ done
 %changelog
 * Sat Jul 27 2019 David Schwörer <schword2mail.dcu.ie> - 4.2.2-20190727gitf454d25
 - Update to version 4.2.2 - f454d25
-- remove bundled mpark
+- remove bundled mpark - only on fedora
 - Ensure sitelib packages do not match arched mpi packages
 
 * Sun Feb 17 2019 David Schwörer <schword2mail.dcu.ie> - 4.2.1-20190217git2fcddf5

@@ -9,15 +9,45 @@ URL:            https://boutproject.github.io/
 Source0:        https://github.com/boutproject/BOUT-dev/releases/download/v%{version}/BOUT++-v%{version}.tar.gz
 
 
-%global test 1
-%if 0%{?epel}
-%global test 0
+# Disable tests and manual on epel <8
+%if 0%{?rhel} && 0%{?rhel} < 8
+%bcond_with manual
+%bcond_with test
+%else
+%bcond_without manual
+%bcond_without test
 %endif
 
-%global manual 1
-%if 0%{?epel}
-%global manual 0
+%if 0%{?rhel} && 0%{?rhel} <= 6
+%ifarch ppc64
+# No mpich on ppc64 in EL6
+%bcond_with mpich
+%else
+%bcond_without mpich
 %endif
+%else
+%bcond_without mpich
+%endif
+
+%ifarch s390 s390x
+# No openmpi on s390(x)
+%global with_openmpi 0
+%bcond_with openmpi
+%else
+%bcond_without openmpi
+%endif
+
+# Enable weak dependencies
+%if 0%{?fedora} || 0%{?rhel}  && 0%{?rhel} > 7
+%bcond_without recommend
+%else
+%bcond_with recommend
+%endif
+
+
+#
+#           DEPENDENCIES
+#
 
 BuildRequires:  m4
 BuildRequires:  zlib-devel
@@ -42,29 +72,22 @@ BuildRequires:  gcc-c++
 # cxx generation
 BuildRequires:  python%{python3_pkgversion}-jinja2
 # Documentation
-%if %{manual}
+%if %{with manual}
 BuildRequires:  doxygen
 BuildRequires:  python3-sphinx
 %endif
 
-%global with_mpich 1
-%global with_openmpi 1
-%if 0%{?rhel} && 0%{?rhel} <= 6
-%ifarch ppc64
-# No mpich on ppc64 in EL6
-%global with_mpich 0
-%endif
-%endif
-%ifarch s390 s390x
-# No openmpi on s390(x)
-%global with_openmpi 0
-%endif
 
-%if %{with_mpich}
+#
+#           DESCRIPTIONS
+#
+
+
+%if %{with mpich}
 BuildRequires:  mpich-devel
 %global mpi_list mpich
 %endif
-%if %{with_openmpi}
+%if %{with openmpi}
 BuildRequires:  openmpi-devel
 %global mpi_list %{?mpi_list} openmpi
 %endif
@@ -78,7 +101,8 @@ models in mind, but it can evolve any number of equations, with
 equations appearing in a readable form.
 
 
-%if %{with_mpich}
+
+%if %{with mpich}
 %package mpich
 Requires: %{name}-common
 Summary: BOUT++ mpich libraries
@@ -128,8 +152,9 @@ This is the BOUT++ library python%{python3_pkgversion} with mpich.
 %endif
 
 
-%if %{with_openmpi}
 
+
+%if %{with openmpi}
 %package openmpi
 Requires: %{name}-common
 Summary: BOUT++ openmpi libraries
@@ -178,8 +203,9 @@ Requires: python%{python3_pkgversion}-numpy
 %description  -n python%{python3_pkgversion}-%{name}-openmpi
 This is the BOUT++ library python%{python3_pkgversion} with openmpi.
 
-
 %endif
+
+
 
 
 %package -n python%{python3_pkgversion}-%{name}
@@ -187,7 +213,7 @@ Summary: BOUT++ python library
 Requires: netcdf4-python%{python3_pkgversion}
 Requires: %{name}-common
 Requires: python%{python3_pkgversion}-numpy
-%if 0%{?fedora}
+%if %{with recommend}
 Recommends: python%{python3_pkgversion}-scipy
 Recommends: python%{python3_pkgversion}-matplotlib
 %endif
@@ -199,7 +225,8 @@ Python%{python3_pkgversion} library for pre and post processing of BOUT++ data
 
 
 
-%if %{manual}
+
+%if %{with manual}
 %package -n %{name}-doc
 Summary: BOUT++ Documentation
 Requires: %{name}-common
@@ -216,24 +243,19 @@ equations appearing in a readable form.
 This package contains the documentation.
 %endif
 
-%package common
-Summary: BOUT++ python library
-BuildArch: noarch
-
-%description  common
-BOUT++ is a framework for writing fluid and plasma simulations in
-curvilinear geometry. It is intended to be quite modular, with a
-variety of numerical methods and time-integration solvers available.
-BOUT++ is primarily designed and tested with reduced plasma fluid
-models in mind, but it can evolve any number of equations, with
-equations appearing in a readable form.
-
-This package contains the common files.
+#
+#           PREP
+#
 
 %prep
 %setup -q -n BOUT++-v%{version}
 
 autoreconf
+
+
+#
+#           BUILD
+#
 
 %build
 %global configure_opts \\\
@@ -255,8 +277,14 @@ done
 for mpi in %{mpi_list}
 do
   pushd build_$mpi
-  module purge
-  module load mpi/$mpi-%{_arch}
+  if [ $mpi = mpich ] ; then
+      %_mpich_load
+  elif [ $mpi = openmpi ] ; then
+      %_openmpi_load
+  else
+      echo "unknown mpi" &> /dev/stderr
+      exit 1
+  fi
   # parallel tests hang on s390(x)
   %configure %{configure_opts} \
     --libdir=%{_libdir}/$mpi/lib \
@@ -267,37 +295,40 @@ do
     --mandir=%{_libdir}/$mpi/share/man
   make %{?_smp_mflags} shared python
   export LD_LIBRARY_PATH=$(pwd)/lib
-  %if %{manual}
+  %if %{with manual}
   make %{?_smp_mflags} -C manual html man
   %endif
-  module purge
+  if [ $mpi = mpich ] ; then
+      %_mpich_unload
+  elif [ $mpi = openmpi ] ; then
+      %_openmpi_unload
+  fi
   popd
 done
 
+#
+#           INSTALL
+#
 
 %install
 
 for mpi in %{mpi_list}
 do
-  module purge
-  module load mpi/$mpi-%{_arch}
   pushd build_$mpi
+  if [ $mpi = mpich ] ; then
+      %_mpich_load
+  else
+      %_openmpi_load
+  fi
   make install DESTDIR=${RPM_BUILD_ROOT}
   mv  ${RPM_BUILD_ROOT}/usr/share/bout++/make.config ${RPM_BUILD_ROOT}/%{_includedir}/$mpi-%{_arch}/bout++/
-  echo "diff -Naur a/make.config b/make.config
---- a/make.config       2017-05-02 23:03:57.298625399 +0100
-+++ b/make.config       2017-05-02 23:04:26.460489477 +0100
-@@ -23,6 +23,7 @@
- SLEPC_DIR ?= 
- SLEPC_ARCH ?= 
- 
-+RELEASED                 = %{version}-%{release}
- 
- # These lines can be replaced in \"make install\" to point to install directories
- # They are used in the CXXFLAGS variable below rather than hard-coding the directories
-" | patch --no-backup-if-mismatch -p1 --fuzz=0 ${RPM_BUILD_ROOT}/%{_includedir}/${mpi}-%{_arch}/bout++/make.config
+
+  # mark this as a released version, to disable compiling the library
+  sed -i '26 i RELEASED                 = %{version}-%{release}' ${RPM_BUILD_ROOT}/%{_includedir}/${mpi}-%{_arch}/bout++/make.config
+
   rm -rf  ${RPM_BUILD_ROOT}/usr/share/bout++
   rm -f ${RPM_BUILD_ROOT}/%{_libdir}/${mpi}/lib/*.a
+
   install lib/*.so.* ${RPM_BUILD_ROOT}/%{_libdir}/${mpi}/lib/
   pushd ${RPM_BUILD_ROOT}/%{_libdir}/${mpi}/lib/
   for f in *.so.*
@@ -306,7 +337,11 @@ do
   done
   popd
   popd
-  module purge
+  if [ $mpi = mpich ] ; then
+      %_mpich_unload
+  else
+      %_openmpi_unload
+  fi
 done
 
 # install python libraries
@@ -317,7 +352,9 @@ do
     cp $d/*py ${RPM_BUILD_ROOT}/%{python3_sitelib}/$d/
 done
 popd
-%if %{manual}
+
+# install manual
+%if %{with manual}
 mandir=$(ls build_*/manual -d|head -n1)
 mkdir -p ${RPM_BUILD_ROOT}/%{_mandir}/man1/
 install -m 644 $mandir/man/bout.1 ${RPM_BUILD_ROOT}/%{_mandir}/man1/bout++.1
@@ -335,78 +372,77 @@ do
     install build_$mpi/tools/pylib/boutcore.*.so ${RPM_BUILD_ROOT}/%{python3_sitearch}/${mpi}/
 done
 
-# Fix python interpreter for libraries
+# Remove shebang
 for f in $(find -L ${RPM_BUILD_ROOT}/%{python3_sitelib} -executable -type f)
 do
-    sed -i 's|#!/usr/bin/env python|#!/usr/bin/python3|' $f
-    sed -i 's|#!/usr/bin/env python3|#!/usr/bin/python3|' $f
-    sed -i 's|#!/usr/bin/python|#!/usr/bin/python3|' $f
-    # remove introduced but excessive 3's
-    sed -i 's|#!/usr/bin/python333|#!/usr/bin/python3|' $f
-    sed -i 's|#!/usr/bin/python33|#!/usr/bin/python3|' $f
+    sed -i '/^#!\/usr\//d' $f
 done
+
+
+#
+#           CHECK
+#
 
 %check
 
-%if %{test}
+%if %{with test}
 for mpi in %{mpi_list}
 do
-    module purge
-    module load mpi/$mpi-%{_arch}
+    if [ $mpi = mpich ] ; then
+	%_mpich_load
+    else
+	%_openmpi_load
+    fi
     pushd build_$mpi
     unset MPIRUN
     test $mpi = openmpi && export MPIRUN="mpirun -oversubscribe -np"
     make %{?_smp_mflags} build-check
     make check
     popd
-    module purge
+    if [ $mpi = mpich ] ; then
+	%_mpich_unload
+    else
+	%_openmpi_unload
+    fi
 done
 %endif
 
-for f in $(find -L ${RPM_BUILD_ROOT}/%{python3_sitelib}/ -type f|grep '\.pyc\$|\.pyo\$')
-do
-    echo cleaning $f
-    rm $f
-done
+#
+#           FILES SECTION
+#
 
-
-
-%if %{with_mpich}
-%post mpich -p /sbin/ldconfig
-%postun mpich -p /sbin/ldconfig
+%if %{with mpich}
 %files mpich
-%{_libdir}/mpich/lib/*.so.*
+%{_libdir}/mpich/lib/libbout++.so.4.2.2
+%{_libdir}/mpich/lib/*.so.1.0.0
+%doc README.md
+%doc CITATION.bib
+%doc CITATION.cff
+%doc CHANGELOG.md
+%doc CONTRIBUTING.md
+%license LICENSE
+%license LICENSE.GPL
 %files mpich-devel
-%dir %{_includedir}/mpich-%{_arch}/bout++
-%dir %{_includedir}/mpich-%{_arch}/bout++/bout
-%dir %{_includedir}/mpich-%{_arch}/bout++/bout/invert
-%dir %{_includedir}/mpich-%{_arch}/bout++/bout/sys
-%{_includedir}/mpich-%{_arch}/bout++/*.hxx
-%{_includedir}/mpich-%{_arch}/bout++/make.config
-%{_includedir}/mpich-%{_arch}/bout++/bout/*.hxx
-%{_includedir}/mpich-%{_arch}/bout++/bout/invert/*.hxx
-%{_includedir}/mpich-%{_arch}/bout++/bout/sys/*.hxx
-%{_includedir}/mpich-%{_arch}/bout++/pvode/*.h
+%{_includedir}/mpich-%{_arch}/bout++
 %{_libdir}/mpich/lib/*.so
 %{_libdir}/mpich/bin/*
 %files -n python%{python3_pkgversion}-%{name}-mpich
 %{python3_sitearch}/mpich/*
 %endif
 
-%if %{with_openmpi}
+%if %{with openmpi}
 %files openmpi
-%{_libdir}/openmpi/lib/*.so.*
+%{_libdir}/openmpi/lib/libbout++.so.4.2.2
+%{_libdir}/openmpi/lib/*.so.1.0.0
+%doc README.md
+%doc CITATION.bib
+%doc CITATION.cff
+%doc CHANGELOG.md
+%doc CONTRIBUTING.md
+%license LICENSE
+%license LICENSE.GPL
 %files openmpi-devel
-%dir %{_includedir}/openmpi-%{_arch}/bout++
-%dir %{_includedir}/openmpi-%{_arch}/bout++/bout
-%dir %{_includedir}/openmpi-%{_arch}/bout++/bout/invert
-%dir %{_includedir}/openmpi-%{_arch}/bout++/bout/sys
-%{_includedir}/openmpi-%{_arch}/bout++/*.hxx
-%{_includedir}/openmpi-%{_arch}/bout++/bout/*.hxx
-%{_includedir}/openmpi-%{_arch}/bout++/make.config
-%{_includedir}/openmpi-%{_arch}/bout++/bout/invert/*.hxx
-%{_includedir}/openmpi-%{_arch}/bout++/bout/sys/*.hxx
-%{_includedir}/openmpi-%{_arch}/bout++/pvode/*.h
+%{_includedir}/openmpi-%{_arch}/bout++
 %{_libdir}/openmpi/lib/*.so
 %{_libdir}/openmpi/bin/*
 %files -n python%{python3_pkgversion}-%{name}-openmpi
@@ -414,16 +450,10 @@ done
 %endif
 
 %files -n python%{python3_pkgversion}-%{name}
-%dir %{python3_sitelib}/*
-%{python3_sitelib}/*/*
-
-%if %{manual}
-%files -n %{name}-doc
-%doc %{_mandir}/man1/bout++*
-%doc  %{_defaultdocdir}/bout++/
-%endif
-
-%files common
+%dir %{python3_sitelib}/*bout*
+%dir %{python3_sitelib}/zoidberg
+%{python3_sitelib}/*bout*/*
+%{python3_sitelib}/zoidberg/*
 %doc README.md
 %doc CITATION.bib
 %doc CITATION.cff
@@ -432,7 +462,25 @@ done
 %license LICENSE
 %license LICENSE.GPL
 
+
+%if %{with manual}
+%files -n %{name}-doc
+%doc %{_mandir}/man1/bout++*
+%doc  %{_defaultdocdir}/bout++/
+%endif
+
+#
+#           CHANGELOG
+#
+
 %changelog
+* Fri Aug 23 2019 David Schwörer <schword2mail.dcu.ie> - 4.2.2-1
+- use ldconfig scriptlets
+- use mpi scriplets
+- Ensure sitelib packages do not match arched mpi packages
+- Move commons package to the base packages
+- specify so version
+
 * Fri Mar 01 2019 David Schwörer <schword2mail.dcu.ie> - 4.2.2-0
 - Update to version 4.2.2
 

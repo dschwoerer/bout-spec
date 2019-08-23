@@ -281,7 +281,7 @@ do
   make %{?_smp_mflags} shared python
   export LD_LIBRARY_PATH=$(pwd)/lib
   %if %{manual}
-  make -C manual html man
+  make %{?_smp_mflags} -C manual html man
   %endif
   module purge
   popd

@@ -9,7 +9,7 @@ URL:            https://boutproject.github.io/
 Source0:        https://github.com/boutproject/BOUT-dev/releases/download/v%{version}/BOUT++-v%{version}.tar.gz
 
 
-# Disable tests and manual on epel <8
+# Disable tests and manual on epel < 8
 %if 0%{?rhel} && 0%{?rhel} < 8
 %bcond_with manual
 %bcond_with test
@@ -38,7 +38,7 @@ Source0:        https://github.com/boutproject/BOUT-dev/releases/download/v%{ver
 %endif
 
 # Enable weak dependencies
-%if 0%{?fedora} || 0%{?rhel}  && 0%{?rhel} > 7
+%if 0%{?fedora} || 0%{?rhel} && 0%{?rhel} > 7
 %bcond_without recommend
 %else
 %bcond_with recommend
@@ -292,11 +292,10 @@ do
     --sbindir=%{_libdir}/$mpi/sbin \
     --includedir=%{_includedir}/$mpi-%{_arch} \
     --datarootdir=%{_libdir}/$mpi/share \
-    --mandir=%{_libdir}/$mpi/share/man
   make %{?_smp_mflags} shared python
   export LD_LIBRARY_PATH=$(pwd)/lib
   %if %{with manual}
-  make %{?_smp_mflags} -C manual html man
+  make %{?_smp_mflags} -C manual html
   %endif
   if [ $mpi = mpich ] ; then
       %_mpich_unload
@@ -356,8 +355,6 @@ popd
 # install manual
 %if %{with manual}
 mandir=$(ls build_*/manual -d|head -n1)
-mkdir -p ${RPM_BUILD_ROOT}/%{_mandir}/man1/
-install -m 644 $mandir/man/bout.1 ${RPM_BUILD_ROOT}/%{_mandir}/man1/bout++.1
 mkdir -p ${RPM_BUILD_ROOT}/%{_defaultdocdir}/bout++/
 rm -rf $mandir/html/.buildinfo
 rm -rf $mandir/html/.doctrees
@@ -422,13 +419,16 @@ done
 %doc CONTRIBUTING.md
 %license LICENSE
 %license LICENSE.GPL
+
 %files mpich-devel
 %{_includedir}/mpich-%{_arch}/bout++
 %{_libdir}/mpich/lib/*.so
 %{_libdir}/mpich/bin/*
+
 %files -n python%{python3_pkgversion}-%{name}-mpich
 %{python3_sitearch}/mpich/*
 %endif
+
 
 %if %{with openmpi}
 %files openmpi
@@ -441,19 +441,19 @@ done
 %doc CONTRIBUTING.md
 %license LICENSE
 %license LICENSE.GPL
+
 %files openmpi-devel
 %{_includedir}/openmpi-%{_arch}/bout++
 %{_libdir}/openmpi/lib/*.so
 %{_libdir}/openmpi/bin/*
+
 %files -n python%{python3_pkgversion}-%{name}-openmpi
 %{python3_sitearch}/openmpi/*
 %endif
 
 %files -n python%{python3_pkgversion}-%{name}
-%dir %{python3_sitelib}/*bout*
-%dir %{python3_sitelib}/zoidberg
-%{python3_sitelib}/*bout*/*
-%{python3_sitelib}/zoidberg/*
+%{python3_sitelib}/*bout*
+%{python3_sitelib}/zoidberg
 %doc README.md
 %doc CITATION.bib
 %doc CITATION.cff
@@ -465,7 +465,6 @@ done
 
 %if %{with manual}
 %files -n %{name}-doc
-%doc %{_mandir}/man1/bout++*
 %doc  %{_defaultdocdir}/bout++/
 %endif
 
@@ -475,11 +474,12 @@ done
 
 %changelog
 * Fri Aug 23 2019 David Schwörer <schword2mail.dcu.ie> - 4.2.2-1
-- use ldconfig scriptlets
-- use mpi scriplets
+- Remove ldconfig scriptlets
+- Use mpi scriplets
 - Ensure sitelib packages do not match arched mpi packages
 - Move commons package to the base packages
-- specify so version
+- Specify so version
+- Drop man page for library
 
 * Fri Mar 01 2019 David Schwörer <schword2mail.dcu.ie> - 4.2.2-0
 - Update to version 4.2.2

@@ -285,13 +285,14 @@ do
       echo "unknown mpi" &> /dev/stderr
       exit 1
   fi
-  # parallel tests hang on s390(x)
+
   %configure %{configure_opts} \
     --libdir=%{_libdir}/$mpi/lib \
     --bindir=%{_libdir}/$mpi/bin \
     --sbindir=%{_libdir}/$mpi/sbin \
     --includedir=%{_includedir}/$mpi-%{_arch} \
-    --datarootdir=%{_libdir}/$mpi/share \
+    --datarootdir=%{_libdir}/$mpi/share
+
   make %{?_smp_mflags} shared python
   export LD_LIBRARY_PATH=$(pwd)/lib
   %if %{with manual}

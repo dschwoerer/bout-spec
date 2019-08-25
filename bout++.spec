@@ -250,6 +250,12 @@ This package contains the documentation.
 %prep
 %setup -q -n BOUT++-v%{version}
 
+# Remove shebang
+for f in $(find -L tools/pylib/ -type f | grep -v _boutcore_build )
+do
+    sed -i '/^#!\//d' $f
+done
+
 autoreconf
 
 
@@ -370,13 +376,6 @@ do
     install build_$mpi/tools/pylib/boutcore.*.so ${RPM_BUILD_ROOT}/%{python3_sitearch}/${mpi}/
 done
 
-# Remove shebang
-for f in $(find -L ${RPM_BUILD_ROOT}/%{python3_sitelib} -executable -type f)
-do
-    sed -i '/^#!\/usr\//d' $f
-done
-
-
 #
 #           CHECK
 #
@@ -387,9 +386,9 @@ done
 for mpi in %{mpi_list}
 do
     if [ $mpi = mpich ] ; then
-	%_mpich_load
+        %_mpich_load
     else
-	%_openmpi_load
+        %_openmpi_load
     fi
     pushd build_$mpi
     unset MPIRUN
@@ -398,9 +397,9 @@ do
     make check
     popd
     if [ $mpi = mpich ] ; then
-	%_mpich_unload
+        %_mpich_unload
     else
-	%_openmpi_unload
+        %_openmpi_unload
     fi
 done
 %endif

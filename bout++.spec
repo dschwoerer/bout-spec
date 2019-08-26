@@ -104,7 +104,6 @@ equations appearing in a readable form.
 
 %if %{with mpich}
 %package mpich
-Requires: %{name}-common
 Summary: BOUT++ mpich libraries
 # Use bundled version, to reproduce upstream results
 Provides: bundled(libpvode)
@@ -156,7 +155,6 @@ This is the BOUT++ library python%{python3_pkgversion} with mpich.
 
 %if %{with openmpi}
 %package openmpi
-Requires: %{name}-common
 Summary: BOUT++ openmpi libraries
 # Use bundled version, to reproduce upstream results
 Provides: bundled(libpvode)
@@ -211,7 +209,6 @@ This is the BOUT++ library python%{python3_pkgversion} with openmpi.
 %package -n python%{python3_pkgversion}-%{name}
 Summary: BOUT++ python library
 Requires: netcdf4-python%{python3_pkgversion}
-Requires: %{name}-common
 Requires: python%{python3_pkgversion}-numpy
 %if %{with recommend}
 Recommends: python%{python3_pkgversion}-scipy
@@ -229,7 +226,6 @@ Python%{python3_pkgversion} library for pre and post processing of BOUT++ data
 %if %{with manual}
 %package -n %{name}-doc
 Summary: BOUT++ Documentation
-Requires: %{name}-common
 BuildArch: noarch
 
 %description -n %{name}-doc

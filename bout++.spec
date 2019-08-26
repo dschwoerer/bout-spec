@@ -1,6 +1,6 @@
 Name:           bout++
 Version:        4.2.2
-Release:        0%{?dist}
+Release:        1%{?dist}
 Summary:        Library for the BOUndary Turbulence simulation framework
 
 # BOUT++ itself is LGPL, but we are linking with GPLed code, so the distributed library is GPL

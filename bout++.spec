@@ -1,5 +1,5 @@
 Name:           bout++
-Version:        4.2.2
+Version:        4.3.0
 Release:        1%{?dist}
 Summary:        Library for the BOUndary Turbulence simulation framework
 
@@ -31,19 +31,24 @@ Source0:        https://github.com/boutproject/BOUT-dev/releases/download/v%{ver
 
 %ifarch s390 s390x
 # No openmpi on s390(x)
-%global with_openmpi 0
 %bcond_with openmpi
 %else
 %bcond_without openmpi
 %endif
 
 # Enable weak dependencies
-%if 0%{?fedora} || 0%{?rhel} && 0%{?rhel} > 7
+%if 0%{?fedora} || ( 0%{?rhel} && 0%{?rhel} > 7 )
 %bcond_without recommend
 %else
 %bcond_with recommend
 %endif
 
+%if 0%{?fedora} || ( 0%{?rhel} && 0%{?rhel} > 7 )
+# Use system mpark
+%bcond_without system_mpark
+%else
+%bcond_with system_mpark
+%endif
 
 #
 #           DEPENDENCIES
@@ -69,6 +74,9 @@ BuildRequires:  python%{python3_pkgversion}-scipy
 BuildRequires:  blas-devel
 BuildRequires:  lapack-devel
 BuildRequires:  gcc-c++
+%if %{with system_mpark}
+BuildRequires:  mpark-variant-devel
+%endif
 # cxx generation
 BuildRequires:  python%{python3_pkgversion}-jinja2
 # Documentation
@@ -107,6 +115,10 @@ equations appearing in a readable form.
 Summary: BOUT++ mpich libraries
 # Use bundled version, to reproduce upstream results
 Provides: bundled(libpvode)
+%if %{with recommend}
+Recommends: environment-modules
+%endif
+
 %package mpich-devel
 Summary: BOUT++ mpich libraries
 Requires: mpich-devel
@@ -158,6 +170,10 @@ This is the BOUT++ library python%{python3_pkgversion} with mpich.
 Summary: BOUT++ openmpi libraries
 # Use bundled version, to reproduce upstream results
 Provides: bundled(libpvode)
+%if %{with recommend}
+Recommends: environment-modules
+%endif
+
 %package openmpi-devel
 Summary: BOUT++ openmpi libraries
 Requires: openmpi-devel
@@ -246,6 +262,15 @@ This package contains the documentation.
 %prep
 %setup -q -n BOUT++-v%{version}
 
+%if %{with system_mpark}
+# use mpark provided by fedora
+rm -rf externalpackages/mpark.variant/
+mkdir -p externalpackages/mpark.variant/include/
+%patch0 -p 1
+%endif
+
+%patch1 -p 1
+
 # Remove shebang
 for f in $(find -L tools/pylib/ -type f | grep -v _boutcore_build )
 do
@@ -293,7 +318,7 @@ do
     --bindir=%{_libdir}/$mpi/bin \
     --sbindir=%{_libdir}/$mpi/sbin \
     --includedir=%{_includedir}/$mpi-%{_arch} \
-    --datarootdir=%{_libdir}/$mpi/share
+    --datarootdir=%{_datadir}
 
   make %{?_smp_mflags} shared python
   export LD_LIBRARY_PATH=$(pwd)/lib
@@ -372,6 +397,8 @@ do
     install build_$mpi/tools/pylib/boutcore.*.so ${RPM_BUILD_ROOT}/%{python3_sitearch}/${mpi}/
 done
 
+%find_lang libbout
+
 #
 #           CHECK
 #
@@ -386,9 +413,8 @@ do
     else
         %_openmpi_load
     fi
+    export OMPI_MCA_rmaps_base_oversubscribe=yes
     pushd build_$mpi
-    unset MPIRUN
-    test $mpi = openmpi && export MPIRUN="mpirun -oversubscribe -np"
     make %{?_smp_mflags} build-check
     make check
     popd
@@ -405,9 +431,10 @@ done
 #
 
 %if %{with mpich}
-%files mpich
-%{_libdir}/mpich/lib/libbout++.so.4.2.2
+%files mpich -f libbout.lang
+%{_libdir}/mpich/lib/libbout++.so.4.3.0
 %{_libdir}/mpich/lib/*.so.1.0.0
+%{_libdir}/mpich/bin/*
 %doc README.md
 %doc CITATION.bib
 %doc CITATION.cff
@@ -419,7 +446,6 @@ done
 %files mpich-devel
 %{_includedir}/mpich-%{_arch}/bout++
 %{_libdir}/mpich/lib/*.so
-%{_libdir}/mpich/bin/*
 
 %files -n python%{python3_pkgversion}-%{name}-mpich
 %{python3_sitearch}/mpich/*
@@ -427,9 +453,10 @@ done
 
 
 %if %{with openmpi}
-%files openmpi
-%{_libdir}/openmpi/lib/libbout++.so.4.2.2
+%files openmpi -f libbout.lang
+%{_libdir}/openmpi/lib/libbout++.so.4.3.0
 %{_libdir}/openmpi/lib/*.so.1.0.0
+%{_libdir}/openmpi/bin/*
 %doc README.md
 %doc CITATION.bib
 %doc CITATION.cff
@@ -441,7 +468,6 @@ done
 %files openmpi-devel
 %{_includedir}/openmpi-%{_arch}/bout++
 %{_libdir}/openmpi/lib/*.so
-%{_libdir}/openmpi/bin/*
 
 %files -n python%{python3_pkgversion}-%{name}-openmpi
 %{python3_sitearch}/openmpi/*

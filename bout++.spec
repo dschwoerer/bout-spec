@@ -8,6 +8,16 @@ License:        GPLv3+
 URL:            https://boutproject.github.io/
 Source0:        https://github.com/boutproject/BOUT-dev/releases/download/v%{version}/BOUT++-v%{version}.tar.gz
 
+# Do not install mpark
+Patch0:         remove-mpark.patch
+# PR 1851
+Patch1:  test-mpi.patch
+# PR 1853
+Patch2:  test-metric-precision.patch
+# PR 1855
+Patch3:  arm-deref.patch
+# PR 1856
+Patch4:  parallel-race.patch
 
 # Disable tests and manual on epel < 8
 %if 0%{?rhel} && 0%{?rhel} < 8
@@ -270,6 +280,9 @@ mkdir -p externalpackages/mpark.variant/include/
 %endif
 
 %patch1 -p 1
+%patch2 -p 1
+%patch3 -p 1
+%patch4 -p 1
 
 # Remove shebang
 for f in $(find -L tools/pylib/ -type f | grep -v _boutcore_build )

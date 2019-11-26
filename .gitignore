@@ -1,0 +1,8 @@
+.build*
+*tar.gz
+\#*
+*~
+*rpm
+BOUT-dev-*
+x86_64
+*/

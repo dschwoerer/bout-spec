@@ -1,0 +1,44 @@
+commit 6612b6ab8f07f10065cfc8ec0925addb910cecb8
+Author: David Schwörer <schword2@mail.dcu.ie>
+Date:   Mon Nov 25 13:44:23 2019 +0000
+
+    Try to prevent race condition while building.
+    
+    This improves the current situation, as before it could happen that
+    building failed, because the .a was not yet created. Now it waits for
+    it to be created. Switching to atomic mv rather then to create it
+    inplace, ensures that if the file is seen, it is valid.
+    This does not address the case when the .a is recreated, and the
+    dependend file is checked before whether the .a has changed.
+
+diff --git a/make.config.in b/make.config.in
+index df80ed2ad..a183cf2e8 100644
+--- a/make.config.in
++++ b/make.config.in
+@@ -242,11 +242,15 @@ endif
+ 
+ ifeq ("$(TARGET)", "sub")
+ LIB=$(MODULE_DIR)/$(SUB_NAME).a
+-sub: makefile $(BOUT_CONFIG_FILE) $(BOUT_TOP)/include $(BOUT_TOP)/lib $(OBJ)
++sub:$(LIB)
++
++$(LIB): makefile $(BOUT_CONFIG_FILE) $(BOUT_TOP)/include $(BOUT_TOP)/lib $(OBJ)
+ ifneq ("$(OBJ)foo", "foo")
+ 	@echo "  Adding $(OBJ) to $(LIB)"
+-	@$(AR) $(ARFLAGS) $(LIB) $(OBJ)
+-	@$(RANLIB) $(LIB)
++	@LIBT=$(LIB).$$$$.a && \
++		$(AR) $(ARFLAGS) $${LIBT} $(OBJ) && \
++		$(RANLIB) $${LIBT} && \
++		mv $${LIBT} $(LIB)
+ endif
+ endif
+ 
+@@ -282,6 +286,7 @@ $(SUB_LIBS):$(DIRS__)
+ 
+ $(SOURCEC): checklib
+ $(SOURCEC:%.cxx=%.o): $(LIB)
++$(TARGET): | $(DIRS)
+ $(TARGET): makefile $(BOUT_CONFIG_FILE) $(OBJ) $(SUB_LIBS)
+ 	@echo "  Linking" $(TARGET)
+ 	@$(LD) $(LDFLAGS) -o $(TARGET) $(OBJ) $(SUB_LIBS) $(BOUT_LIBS)

@@ -1,0 +1,20 @@
+commit 9feb40fb4feb6d90456a45f8b09464307f1a1873
+Author: David Schwörer <schword2@mail.dcu.ie>
+Date:   Sun Nov 24 13:56:49 2019 +0000
+
+    Loosen tolerance for other arches
+
+diff --git a/tests/unit/mesh/parallel/test_shiftedmetric.cxx b/tests/unit/mesh/parallel/test_shiftedmetric.cxx
+index 9fb0c421f..b589af68d 100644
+--- a/tests/unit/mesh/parallel/test_shiftedmetric.cxx
++++ b/tests/unit/mesh/parallel/test_shiftedmetric.cxx
+@@ -166,7 +166,8 @@ TEST_F(ShiftedMetricTest, FromFieldAligned) {
+   // Loosen tolerance a bit due to FFTs
+   EXPECT_TRUE(IsFieldEqual(result, expected, "RGN_ALL",
+                            FFTTolerance));
+-  EXPECT_TRUE(IsFieldEqual(toFieldAligned(result), input));
++  EXPECT_TRUE(IsFieldEqual(toFieldAligned(result), input,
++			   "RGN_ALL", FFTTolerance));
+   EXPECT_TRUE(areFieldsCompatible(result, expected));
+   EXPECT_FALSE(areFieldsCompatible(result, input));
+ }

@@ -1,0 +1,27 @@
+commit 97418106eb7cf1f6dd660b494939af83b88beda6
+Author: David Schwörer <schword2@mail.dcu.ie>
+Date:   Mon Nov 25 13:18:33 2019 +0000
+
+    Address needs to be aligned
+    
+    This value gets dereferenced by python, but without knowing it's true
+    type. Thus a SIGBUS is thrown on some architectures, namely arm. This
+    can be avoided by copying it to a larger type first, e.g. long, that
+    is sufficiently aligned, and thus can be safely dereferenced by
+    python.
+
+diff --git a/tools/pylib/_boutcore_build/helper.h.in b/tools/pylib/_boutcore_build/helper.h.in
+index 24c26bdf0..21f264d4c 100644
+--- a/tools/pylib/_boutcore_build/helper.h.in
++++ b/tools/pylib/_boutcore_build/helper.h.in
+@@ -77,8 +77,9 @@ class PythonModelCallback{
+ class PythonModel: public PhysicsModel{
+ protected:
+   int init(bool restarting) override{
++    long aligned_restarting = restarting;
+     if (_init){
+-      _init->cy_execute(&restarting);
++      _init->cy_execute(&aligned_restarting);
+     }
+     return 0;
+   };

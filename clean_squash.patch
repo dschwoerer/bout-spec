@@ -1,0 +1,28 @@
+commit d4850915748da3387b03327b258828f6c8ade78a
+Author: David Schwörer <schword2@mail.dcu.ie>
+Date:   Thu Nov 8 16:57:07 2018 +0000
+
+    Clean squashoutput.py
+
+diff --git a/tools/pylib/boutdata/squashoutput.py b/tools/pylib/boutdata/squashoutput.py
+index 52bcaa40d..c0ed69a81 100644
+--- a/tools/pylib/boutdata/squashoutput.py
++++ b/tools/pylib/boutdata/squashoutput.py
+@@ -1,5 +1,3 @@
+-#!/usr/bin/env python3
+-
+ """
+ Collect all data from BOUT.dmp.* files and create a single output file.
+ 
+@@ -8,11 +6,6 @@ Output file named BOUT.dmp.nc by default
+ Useful because this discards ghost cell data (that is only useful for debugging)
+ and because single files are quicker to download.
+ 
+-When run as script:
+-    - first command line argument specifies data directory (default is the
+-      current directory where the script is run)
+-    - optional argument "--outputname <name>" can be given to change the name
+-      of the output file
+ """
+ 
+ from boutdata.data import BoutOutputs
